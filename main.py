@@ -1,6 +1,6 @@
 import random
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
@@ -16,16 +16,16 @@ def read_index():
 
 
 @app.get("/api/lotto")
-def generate_lotto(games: int = Query(default=5, ge=1, le=20)):
+def generate_lotto():
     """
-    로또 번호를 생성해서 반환하는 API.
-    games: 생성할 게임 수 (기본 5게임, 최대 20게임)
+    로또 번호 1게임을 생성해서 반환.
+    main: 정렬된 6개 번호
+    bonus: 나머지 중 무작위 보너스 번호 1개 (main과 중복 없음)
     """
-    result = []
-    for _ in range(games):
-        numbers = sorted(random.sample(range(1, 46), 6))
-        result.append(numbers)
-    return {"games": result}
+    picked = random.sample(range(1, 46), 7)
+    main_numbers = sorted(picked[:6])
+    bonus_number = picked[6]
+    return {"main": main_numbers, "bonus": bonus_number}
 
 
 @app.get("/api/health")

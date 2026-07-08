@@ -79,58 +79,83 @@
 
   .hint { margin-top: 16px; font-size: 13px; color: var(--text-dim); min-height: 18px; text-align: center; }
 
-  .games { margin-top: 44px; width: 100%; max-width: 660px; display: flex; flex-direction: column; gap: 14px; }
-
-  .game-row {
-    background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px;
-    opacity: 0; transform: translateY(16px); animation: rowIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  /* ---------- single game card ---------- */
+  .game-card {
+    margin-top: 44px; width: 100%; max-width: 640px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 22px;
+    padding: 30px 26px;
     position: relative;
+    opacity: 0; transform: translateY(16px);
   }
-  @keyframes rowIn { to { opacity: 1; transform: translateY(0); } }
+  .game-card.show { animation: cardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
 
-  .game-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-  .game-label { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: var(--text-dim); display: flex; align-items: center; gap: 8px; }
-  .game-label .letter {
-    width: 22px; height: 22px; border-radius: 6px; background: var(--bg-soft); color: var(--gold);
-    display: flex; align-items: center; justify-content: center; font-weight: 700; font-family: 'Inter', sans-serif; font-size: 12px;
-  }
+  .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+  .card-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.1em; color: var(--text-dim); text-transform: uppercase; }
 
   .row-actions { display: flex; gap: 8px; }
   .icon-btn {
-    width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg-soft);
-    color: var(--text-dim); cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg-soft);
+    color: var(--text-dim); cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center;
     transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
   }
   .icon-btn:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
   .icon-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
 
-  /* ---------- draw track: dinosaur fire-breather + slots ---------- */
-  .draw-track { display: flex; align-items: center; gap: 18px; position: relative; }
+  /* ---------- draw track: dinosaur fire-breather ---------- */
+  .draw-track { display: flex; align-items: center; gap: 20px; position: relative; flex-wrap: wrap; }
 
   .dino-emitter {
-    width: 56px; height: 56px; position: relative; flex-shrink: 0;
+    width: 68px; height: 68px; position: relative; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
   }
   .dino {
-    font-size: 38px; line-height: 1; display: inline-block;
-    transform-origin: 60% 70%;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35));
+    font-size: 46px; line-height: 1; display: inline-block;
+    transform-origin: 60% 75%;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
   }
-  .dino.breathing { animation: dinoBreathe 0.32s ease-in-out; }
-  @keyframes dinoBreathe {
+  .dino.charging { animation: dinoCharge 0.55s ease-in-out; }
+  @keyframes dinoCharge {
     0%   { transform: scale(1) rotate(0deg); }
-    35%  { transform: scale(1.18) rotate(-8deg); }
-    70%  { transform: scale(1.05) rotate(4deg); }
+    25%  { transform: scale(1.03) rotate(-2deg); }
+    50%  { transform: scale(1.01) rotate(2deg); }
+    75%  { transform: scale(1.06) rotate(-4deg); }
+    100% { transform: scale(1.18) rotate(-9deg); }
+  }
+  .dino.recover { animation: dinoRecover 0.35s ease-out; }
+  @keyframes dinoRecover {
+    0%   { transform: scale(1.18) rotate(-9deg); }
     100% { transform: scale(1) rotate(0deg); }
   }
 
+  .ember {
+    position: absolute; width: 10px; height: 10px; border-radius: 50%;
+    background: radial-gradient(circle, #FFF3C4, #FF9A3C 55%, transparent 75%);
+    top: 20px; left: 46px; opacity: 0; transform: scale(0.3);
+    filter: blur(1px); pointer-events: none;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .ember.growing { opacity: 1; transform: scale(3); }
+
+  .flash {
+    position: absolute; width: 76px; height: 76px; border-radius: 50%;
+    top: -4px; left: 20px; pointer-events: none; z-index: 4; opacity: 0;
+    background: radial-gradient(circle, rgba(255,230,160,0.95), rgba(255,120,40,0.4) 55%, transparent 75%);
+  }
+  .flash.burst { animation: flashBurst 0.4s ease-out forwards; }
+  @keyframes flashBurst {
+    0%   { opacity: 0; transform: scale(0.3); }
+    28%  { opacity: 1; transform: scale(1.35); }
+    100% { opacity: 0; transform: scale(1.9); }
+  }
+
   .flame-ball {
-    width: 46px; height: 46px; border-radius: 50%;
-    position: absolute; top: 5px; left: 32px; z-index: 5;
+    width: 48px; height: 48px; border-radius: 50%;
+    position: absolute; top: 10px; left: 44px; z-index: 5;
     display: flex; align-items: center; justify-content: center;
-    font-family: 'Fraunces', serif; font-weight: 700; font-size: 16px;
+    font-family: 'Fraunces', serif; font-weight: 700; font-size: 17px;
     opacity: 0;
-    box-shadow: 0 0 16px 5px rgba(255,130,40,0.55), inset -3px -3px 6px rgba(0,0,0,0.18), inset 3px 3px 6px rgba(255,255,255,0.25);
+    box-shadow: 0 0 18px 6px rgba(255,130,40,0.55), inset -3px -3px 6px rgba(0,0,0,0.18), inset 3px 3px 6px rgba(255,255,255,0.25);
   }
   .flame-ball.tumbling {
     opacity: 1;
@@ -147,16 +172,29 @@
   .spark {
     position: absolute; border-radius: 50%; pointer-events: none; z-index: 6;
     background: radial-gradient(circle, #FFE28A, #FF7A3C 70%);
-    animation: sparkFly 0.5s ease-out forwards;
+    animation: sparkFly 0.55s ease-out forwards;
   }
-  @keyframes sparkFly {
-    to { transform: translate(var(--sx), var(--sy)) scale(0.15); opacity: 0; }
+  @keyframes sparkFly { to { transform: translate(var(--sx), var(--sy)) scale(0.15); opacity: 0; } }
+
+  .trail-spark {
+    position: absolute; border-radius: 50%; pointer-events: none; z-index: 6;
+    background: radial-gradient(circle, #FFD98A, #FF7A3C 70%);
+    opacity: 0.9;
+    animation: trailFade 0.35s ease-out forwards;
   }
+  @keyframes trailFade { to { opacity: 0; transform: scale(0.3); } }
+
+  .shockwave {
+    position: absolute; inset: 0; margin: auto; width: 48px; height: 48px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.65); opacity: 0.9; pointer-events: none;
+    animation: shockExpand 0.5s ease-out forwards;
+  }
+  @keyframes shockExpand { to { transform: scale(1.9); opacity: 0; } }
 
   .balls-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
   .ball-slot {
-    width: 46px; height: 46px; border-radius: 50%;
+    width: 48px; height: 48px; border-radius: 50%;
     border: 2px dashed var(--line); background: var(--bg-soft);
     display: flex; align-items: center; justify-content: center;
     position: relative;
@@ -164,15 +202,29 @@
   .ball-slot.filled {
     border: none;
     box-shadow: inset -3px -3px 6px rgba(0,0,0,0.18), inset 3px 3px 6px rgba(255,255,255,0.35), 0 6px 12px -4px rgba(0,0,0,0.5);
-    animation: settle 0.4s cubic-bezier(0.34, 1.6, 0.64, 1);
+    animation: settle 0.42s cubic-bezier(0.34, 1.6, 0.64, 1);
   }
-  @keyframes settle { 0% { transform: scale(0.55); } 60% { transform: scale(1.14); } 100% { transform: scale(1); } }
+  @keyframes settle { 0% { transform: scale(0.5); } 60% { transform: scale(1.16); } 100% { transform: scale(1); } }
+
+  .ball-slot.bonus-slot { border-color: var(--gold); }
+  .ball-slot.bonus-slot.filled {
+    box-shadow: 0 0 0 3px rgba(232,185,63,0.5), inset -3px -3px 6px rgba(0,0,0,0.18), inset 3px 3px 6px rgba(255,255,255,0.35), 0 6px 12px -4px rgba(0,0,0,0.5);
+  }
 
   .ball-num { font-family: 'Fraunces', serif; font-weight: 700; font-size: 17px; }
 
-  /* ---------- luck meter / comment (revealed after draw) ---------- */
+  .plus-sep { font-size: 20px; color: var(--text-dim); font-weight: 700; margin: 0 2px; }
+
+  .bonus-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .bonus-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em;
+    color: var(--gold); opacity: 0; transition: opacity 0.4s ease;
+  }
+  .bonus-label.ready { opacity: 1; }
+
+  /* ---------- luck meter / comment ---------- */
   .luck-meter {
-    margin-top: 18px; display: flex; align-items: center; gap: 10px;
+    margin-top: 24px; display: flex; align-items: center; gap: 10px;
     opacity: 0; transition: opacity 0.5s ease;
   }
   .luck-meter.ready { opacity: 1; }
@@ -190,7 +242,7 @@
   }
   .game-comment.ready { opacity: 1; }
 
-  .placeholder-note { text-align: center; color: var(--text-dim); font-size: 13px; padding: 40px 0; border: 1px dashed var(--line); border-radius: 18px; }
+  .placeholder-note { text-align: center; color: var(--text-dim); font-size: 13px; padding: 40px 0; border: 1px dashed var(--line); border-radius: 18px; width: 100%; max-width: 640px; margin-top: 44px; }
 
   .copied-toast {
     position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
@@ -200,19 +252,18 @@
   }
   .copied-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  .total-count {
-    margin-top: 18px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim);
-  }
+  .total-count { margin-top: 18px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); }
   .total-count span { color: var(--gold); font-weight: 600; }
 
   footer { margin-top: 40px; color: var(--text-dim); font-size: 12px; text-align: center; }
 
   @media (max-width: 480px) {
-    .ball-slot, .dino-emitter, .flame-ball { width: 38px; height: 38px; }
-    .dino { font-size: 30px; }
+    .ball-slot { width: 40px; height: 40px; }
+    .dino-emitter, .flame-ball { width: 40px; height: 40px; }
+    .dino { font-size: 34px; }
     .ball-num { font-size: 14px; }
-    .game-row { padding: 16px; }
-    .draw-track { gap: 12px; }
+    .game-card { padding: 22px 18px; }
+    .draw-track { gap: 14px; }
   }
 </style>
 </head>
@@ -220,17 +271,17 @@
 
 <div id="confetti-layer"></div>
 
-  <div class="eyebrow">Lucky Draw · 5 Games · FastAPI</div>
+  <div class="eyebrow">Lucky Draw · FastAPI</div>
   <h1>행운의 <em>로또번호</em> 생성기</h1>
-  <p class="subtitle">공룡이 불을 뿜어 번호를 만들어드려요 🦖🔥 서버에서 뽑은 번호로 5게임을 한 번에 확인해보세요</p>
+  <p class="subtitle">공룡이 불을 뿜어 번호를 하나씩 만들어드려요 🦖🔥 보너스 번호까지 확인해보세요</p>
 
   <div class="fortune-banner" id="fortune-banner"></div>
 
-  <button id="generate-btn">5게임 한번에 뽑기 🎱</button>
+  <button id="generate-btn">번호 뽑기 🎱</button>
   <div class="hint" id="hint"></div>
 
-  <div class="games" id="games">
-    <div class="placeholder-note">아직 생성된 번호가 없어요. 버튼을 눌러보세요.</div>
+  <div id="game-area">
+    <div class="placeholder-note" id="placeholder-note">아직 생성된 번호가 없어요. 버튼을 눌러보세요.</div>
   </div>
 
   <div class="total-count" id="total-count"></div>
@@ -242,13 +293,13 @@
 <script>
   const btn = document.getElementById('generate-btn');
   const hint = document.getElementById('hint');
-  const gamesContainer = document.getElementById('games');
+  const gameArea = document.getElementById('game-area');
+  const placeholderNote = document.getElementById('placeholder-note');
   const fortuneBanner = document.getElementById('fortune-banner');
   const confettiLayer = document.getElementById('confetti-layer');
   const copiedToast = document.getElementById('copied-toast');
   const totalCountEl = document.getElementById('total-count');
 
-  const letters = ['A', 'B', 'C', 'D', 'E'];
   const confettiColors = ['#E8B93F', '#4C8DE8', '#E8574C', '#4FAE6E', '#EDEFF7'];
 
   const COLOR_HEX = {
@@ -292,11 +343,10 @@
     return 'c-green';
   }
 
-  async function fetchGames(count) {
-    const res = await fetch(`/api/lotto?games=${count}`);
+  async function fetchLotto() {
+    const res = await fetch('/api/lotto');
     if (!res.ok) throw new Error('서버 요청 실패');
-    const data = await res.json();
-    return data.games;
+    return await res.json(); // { main: [...], bonus: n }
   }
 
   function analyzeGame(numbers) {
@@ -326,8 +376,8 @@
     return Math.min(99, Math.max(35, 40 + (sum % 55)));
   }
 
-  function copyNumbers(numbers, letter) {
-    const text = `게임 ${letter}: ${numbers.join(', ')}`;
+  function copyNumbers(main, bonus) {
+    const text = `번호: ${main.join(', ')} + 보너스 ${bonus}`;
     navigator.clipboard?.writeText(text).catch(() => {});
     copiedToast.classList.add('show');
     setTimeout(() => copiedToast.classList.remove('show'), 1600);
@@ -348,23 +398,82 @@
     }
   }
 
-  function buildRow(letter, delayIndex) {
-    const row = document.createElement('div');
-    row.className = 'game-row';
-    row.style.animationDelay = (delayIndex * 0.1) + 's';
+  function spawnSparks(row, originEl, count = 8) {
+    const rowRect = row.getBoundingClientRect();
+    const originRect = originEl.getBoundingClientRect();
+    const originX = originRect.left - rowRect.left + originRect.width / 2;
+    const originY = originRect.top - rowRect.top + originRect.height / 2;
 
-    row.innerHTML = `
-      <div class="game-top">
-        <div class="game-label"><span class="letter">${letter}</span>GAME ${letter}</div>
+    for (let i = 0; i < count; i++) {
+      const spark = document.createElement('div');
+      spark.className = 'spark';
+      const size = 4 + Math.random() * 6;
+      spark.style.width = size + 'px';
+      spark.style.height = size + 'px';
+      spark.style.left = originX + 'px';
+      spark.style.top = originY + 'px';
+      const angle = (Math.random() * 100 - 20) * (Math.PI / 180);
+      const dist = 30 + Math.random() * 34;
+      spark.style.setProperty('--sx', Math.cos(angle) * dist + 'px');
+      spark.style.setProperty('--sy', Math.sin(angle) * dist + 'px');
+      row.appendChild(spark);
+      setTimeout(() => spark.remove(), 600);
+    }
+  }
+
+  function spawnTrail(row, startX, startY, endX, endY) {
+    const steps = 5;
+    for (let i = 1; i <= steps; i++) {
+      setTimeout(() => {
+        const t = i / steps;
+        const x = startX + (endX - startX) * t;
+        const y = startY + (endY - startY) * t;
+        const trail = document.createElement('div');
+        trail.className = 'trail-spark';
+        const size = 8 - i * 0.8;
+        trail.style.width = size + 'px';
+        trail.style.height = size + 'px';
+        trail.style.left = x + 'px';
+        trail.style.top = y + 'px';
+        row.appendChild(trail);
+        setTimeout(() => trail.remove(), 380);
+      }, i * 55);
+    }
+  }
+
+  function spawnShockwave(slotEl) {
+    const wave = document.createElement('div');
+    wave.className = 'shockwave';
+    slotEl.appendChild(wave);
+    setTimeout(() => wave.remove(), 520);
+  }
+
+  function buildCard() {
+    const card = document.createElement('div');
+    card.className = 'game-card';
+
+    card.innerHTML = `
+      <div class="card-top">
+        <div class="card-title">이번 회차 번호</div>
         <div class="row-actions">
           <button class="icon-btn copy-btn" title="복사">⧉</button>
           <button class="icon-btn reroll-btn" title="다시 뽑기">↻</button>
         </div>
       </div>
       <div class="draw-track">
-        <div class="dino-emitter"><span class="dino">🦖</span><div class="flame-ball"></div></div>
+        <div class="dino-emitter">
+          <div class="ember"></div>
+          <div class="flash"></div>
+          <span class="dino">🦖</span>
+          <div class="flame-ball"></div>
+        </div>
         <div class="balls-row">
           ${Array.from({ length: 6 }).map(() => '<div class="ball-slot"></div>').join('')}
+          <span class="plus-sep">+</span>
+          <div class="bonus-wrap">
+            <div class="ball-slot bonus-slot"></div>
+            <div class="bonus-label">BONUS</div>
+          </div>
         </div>
       </div>
       <div class="luck-meter">
@@ -374,85 +483,88 @@
       <div class="game-comment"></div>
     `;
 
-    row._numbers = null;
+    card._data = null;
 
-    row.querySelector('.copy-btn').addEventListener('click', () => {
-      if (row._numbers) copyNumbers(row._numbers, letter);
+    card.querySelector('.copy-btn').addEventListener('click', () => {
+      if (card._data) copyNumbers(card._data.main, card._data.bonus);
     });
 
-    row.querySelector('.reroll-btn').addEventListener('click', async () => {
-      const rerollBtn = row.querySelector('.reroll-btn');
+    card.querySelector('.reroll-btn').addEventListener('click', async () => {
+      const rerollBtn = card.querySelector('.reroll-btn');
+      const copyBtn = card.querySelector('.copy-btn');
       rerollBtn.disabled = true;
+      copyBtn.disabled = true;
       try {
-        const [newNumbers] = await fetchGames(1);
-        await resetAndDraw(row, newNumbers);
+        const data = await fetchLotto();
+        await resetAndDraw(card, data);
       } catch (e) {
         console.error(e);
       } finally {
         rerollBtn.disabled = false;
+        copyBtn.disabled = false;
       }
     });
 
-    return row;
+    return card;
   }
 
-  async function resetAndDraw(row, numbers) {
-    // 슬롯 초기화
-    const slots = row.querySelectorAll('.ball-slot');
+  async function resetAndDraw(card, data) {
+    const slots = card.querySelectorAll('.ball-slot');
     slots.forEach(s => {
-      s.className = 'ball-slot';
+      const isBonus = s.classList.contains('bonus-slot');
+      s.className = isBonus ? 'ball-slot bonus-slot' : 'ball-slot';
       s.style.background = '';
       s.style.color = '';
       s.innerHTML = '';
     });
-    const meter = row.querySelector('.luck-meter');
-    const comment = row.querySelector('.game-comment');
+    const meter = card.querySelector('.luck-meter');
+    const comment = card.querySelector('.game-comment');
+    const bonusLabel = card.querySelector('.bonus-label');
     meter.classList.remove('ready');
     comment.classList.remove('ready');
-    row.querySelector('.luck-bar-fill').style.width = '0%';
+    bonusLabel.classList.remove('ready');
+    card.querySelector('.luck-bar-fill').style.width = '0%';
 
-    await playDraw(row, numbers);
-    finalizeRow(row, numbers);
+    await playDraw(card, data);
+    finalizeCard(card, data);
   }
 
-  function spawnSparks(row, originEl) {
-    const rowRect = row.getBoundingClientRect();
-    const originRect = originEl.getBoundingClientRect();
-    const originX = originRect.left - rowRect.left + originRect.width / 2;
-    const originY = originRect.top - rowRect.top + originRect.height / 2;
+  async function playDraw(card, data) {
+    card._data = data;
+    const dino = card.querySelector('.dino');
+    const ember = card.querySelector('.ember');
+    const flash = card.querySelector('.flash');
+    const flame = card.querySelector('.flame-ball');
+    const slots = card.querySelectorAll('.ball-slot');
+    const bonusLabel = card.querySelector('.bonus-label');
 
-    for (let i = 0; i < 8; i++) {
-      const spark = document.createElement('div');
-      spark.className = 'spark';
-      const size = 4 + Math.random() * 5;
-      spark.style.width = size + 'px';
-      spark.style.height = size + 'px';
-      spark.style.left = originX + 'px';
-      spark.style.top = originY + 'px';
-      const angle = (Math.random() * 100 - 20) * (Math.PI / 180);
-      const dist = 30 + Math.random() * 30;
-      spark.style.setProperty('--sx', Math.cos(angle) * dist + 'px');
-      spark.style.setProperty('--sy', Math.sin(angle) * dist + 'px');
-      row.appendChild(spark);
-      setTimeout(() => spark.remove(), 550);
-    }
-  }
+    const allNumbers = [...data.main, data.bonus];
 
-  async function playDraw(row, numbers) {
-    row._numbers = numbers;
-    const dino = row.querySelector('.dino');
-    const flame = row.querySelector('.flame-ball');
-    const slots = row.querySelectorAll('.ball-slot');
-
-    for (let i = 0; i < numbers.length; i++) {
-      const n = numbers[i];
+    for (let i = 0; i < allNumbers.length; i++) {
+      const n = allNumbers[i];
       const group = colorGroup(n);
+      const isBonus = i === 6;
 
-      // 1) 공룡이 움찔하며 숨을 들이쉬고 불꽃을 뿜음
-      dino.classList.add('breathing');
-      spawnSparks(row, dino);
-      setTimeout(() => dino.classList.remove('breathing'), 320);
+      if (isBonus) {
+        bonusLabel.classList.add('ready');
+        hint.textContent = '보너스 번호를 뽑는 중...';
+      }
 
+      // 1) 공룡이 힘을 모음 (충전)
+      dino.classList.add('charging');
+      ember.classList.add('growing');
+      await sleep(420);
+
+      // 2) 불꽃 폭발 + 스파크
+      dino.classList.remove('charging');
+      dino.classList.add('recover');
+      ember.classList.remove('growing');
+      flash.classList.add('burst');
+      spawnSparks(card, dino, 10);
+      setTimeout(() => { flash.classList.remove('burst'); }, 420);
+      setTimeout(() => { dino.classList.remove('recover'); }, 360);
+
+      // 3) 불꽃 공 안에서 숫자가 빠르게 바뀜
       flame.classList.add('tumbling');
       flame.style.opacity = '1';
       flame.style.transform = 'none';
@@ -461,55 +573,65 @@
       const tumbleTimer = setInterval(() => {
         flame.textContent = Math.ceil(Math.random() * 45);
       }, 45);
-      await sleep(480 + Math.random() * 160);
+      await sleep(420 + Math.random() * 140);
       clearInterval(tumbleTimer);
 
-      // 2) 불꽃이 식으며 숫자가 확정되고 해당 색 공으로 굳어짐
+      // 4) 숫자 확정, 해당 색으로 굳음
       flame.classList.remove('tumbling');
       flame.textContent = n;
       flame.style.background = COLOR_HEX[group].bg;
       flame.style.color = COLOR_HEX[group].text;
       flame.style.boxShadow = 'inset -3px -3px 6px rgba(0,0,0,0.18), inset 3px 3px 6px rgba(255,255,255,0.35), 0 6px 12px -4px rgba(0,0,0,0.5)';
 
-      await sleep(140);
+      await sleep(130);
 
-      // 3) 굳어진 공이 날아가서 제자리(슬롯)에 안착
+      // 5) 슬롯까지 날아감 (불꽃 잔상 포함)
       const flameRect = flame.getBoundingClientRect();
       const slotRect = slots[i].getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
       const dx = slotRect.left - flameRect.left;
       const dy = slotRect.top - flameRect.top;
 
-      flame.style.transition = 'transform 0.5s cubic-bezier(0.32, 0.9, 0.3, 1.15)';
+      spawnTrail(
+        card,
+        flameRect.left - cardRect.left + flameRect.width / 2,
+        flameRect.top - cardRect.top + flameRect.height / 2,
+        slotRect.left - cardRect.left + slotRect.width / 2,
+        slotRect.top - cardRect.top + slotRect.height / 2
+      );
+
+      flame.style.transition = 'transform 0.48s cubic-bezier(0.32, 0.9, 0.3, 1.15)';
       flame.style.transform = `translate(${dx}px, ${dy}px) rotate(${480 + i * 40}deg)`;
 
-      await sleep(520);
+      await sleep(490);
 
-      // 4) 슬롯에 공 안착
+      // 6) 슬롯에 착지 + 충격파
       slots[i].classList.add('filled');
       slots[i].style.background = COLOR_HEX[group].bg;
       slots[i].style.color = COLOR_HEX[group].text;
       slots[i].innerHTML = `<span class="ball-num">${n}</span>`;
+      spawnShockwave(slots[i]);
 
-
-      // 5) 불꽃 초기화 (다음 공 준비)
+      // 7) 불꽃 초기화
       flame.style.transition = 'none';
       flame.style.transform = 'none';
       flame.style.opacity = '0';
       flame.textContent = '';
       flame.style.boxShadow = '';
 
-      await sleep(140);
+      await sleep(160);
     }
   }
 
-  function finalizeRow(row, numbers) {
-    const score = luckScoreFor(numbers);
-    const comment = analyzeGame(numbers);
+  function finalizeCard(card, data) {
+    const allNumbers = [...data.main, data.bonus];
+    const score = luckScoreFor(data.main);
+    const comment = analyzeGame(data.main);
 
-    const meter = row.querySelector('.luck-meter');
-    const fill = row.querySelector('.luck-bar-fill');
-    const pct = row.querySelector('.luck-pct');
-    const commentEl = row.querySelector('.game-comment');
+    const meter = card.querySelector('.luck-meter');
+    const fill = card.querySelector('.luck-bar-fill');
+    const pct = card.querySelector('.luck-pct');
+    const commentEl = card.querySelector('.game-comment');
 
     pct.textContent = score + '%';
     commentEl.textContent = comment;
@@ -519,40 +641,54 @@
     requestAnimationFrame(() => { fill.style.width = score + '%'; });
 
     totalGenerated++;
-    totalCountEl.innerHTML = `지금까지 뽑은 게임 수: <span>${totalGenerated}</span>게임`;
+    totalCountEl.innerHTML = `지금까지 뽑은 횟수: <span>${totalGenerated}</span>번`;
   }
 
   async function generateAll() {
     btn.disabled = true;
-    hint.textContent = '서버에서 번호를 뽑는 중...';
+    hint.textContent = '번호를 뽑는 중...';
     fortuneBanner.classList.remove('show');
-    gamesContainer.innerHTML = '';
 
-    let allGames;
+    let data;
     try {
-      allGames = await fetchGames(5);
+      data = await fetchLotto();
     } catch (e) {
       hint.textContent = '서버 연결에 실패했어요. 잠시 후 다시 시도해주세요.';
       btn.disabled = false;
       return;
     }
 
-    const rows = allGames.map((numbers, i) => {
-      const row = buildRow(letters[i], i);
-      gamesContainer.appendChild(row);
-      return { row, numbers };
-    });
+    if (placeholderNote.parentNode) placeholderNote.remove();
 
-    const drawPromises = rows.map(({ row, numbers }, i) =>
-      sleep(i * 260).then(() => playDraw(row, numbers)).then(() => finalizeRow(row, numbers))
-    );
+    let card = gameArea.querySelector('.game-card');
+    if (!card) {
+      card = buildCard();
+      gameArea.appendChild(card);
+      requestAnimationFrame(() => card.classList.add('show'));
+      await sleep(120);
+    } else {
+      // 슬롯 초기화 후 재사용
+      const slots = card.querySelectorAll('.ball-slot');
+      slots.forEach(s => {
+        const isBonus = s.classList.contains('bonus-slot');
+        s.className = isBonus ? 'ball-slot bonus-slot' : 'ball-slot';
+        s.style.background = '';
+        s.style.color = '';
+        s.innerHTML = '';
+      });
+      card.querySelector('.luck-meter').classList.remove('ready');
+      card.querySelector('.game-comment').classList.remove('ready');
+      card.querySelector('.bonus-label').classList.remove('ready');
+      card.querySelector('.luck-bar-fill').style.width = '0%';
+    }
 
-    await Promise.all(drawPromises);
+    await playDraw(card, data);
+    finalizeCard(card, data);
 
     fortuneBanner.textContent = fortunes[Math.floor(Math.random() * fortunes.length)];
     fortuneBanner.classList.add('show');
     burstConfetti();
-    hint.textContent = '각 게임 옆 ↻ 버튼으로 개별 다시 뽑기도 가능해요.';
+    hint.textContent = '오른쪽 위 ↻ 버튼으로 다시 뽑기도 가능해요.';
     btn.disabled = false;
   }
 
