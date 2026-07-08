@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>행운의 로또번호 생성기</title>
+<title>공룡 뽑기 — 당첨 or 꽝</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0B1B10;
@@ -15,12 +15,7 @@
     --text-dim: #9AAE9C;
     --line: rgba(255,255,255,0.11);
     --gold: #E8B93F;
-
-    --c-yellow: #E8B93F;
-    --c-blue: #4C8DE8;
-    --c-red: #E8574C;
-    --c-gray: #8A93A6;
-    --c-green: #4FAE6E;
+    --danger: #C9564B;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,13 +28,10 @@
     color: var(--text);
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 70px 20px 40px;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 60px 20px 50px;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
-    position: relative;
   }
 
   .jungle-decor { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
@@ -48,273 +40,193 @@
     background: radial-gradient(circle at 35% 30%, #3B6B36, #1E3A1C 70%);
   }
 
-  #confetti-layer { position: fixed; inset: 0; pointer-events: none; z-index: 200; overflow: hidden; }
-  .confetti-piece { position: absolute; top: -20px; border-radius: 2px; animation: fall linear forwards; }
-  @keyframes fall { to { transform: translateY(110vh) rotate(540deg); opacity: 0.2; } }
-
   .eyebrow {
     font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--gold); margin-bottom: 18px;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 16px;
     display: flex; align-items: center; gap: 10px;
   }
   .eyebrow::before, .eyebrow::after { content: ''; width: 22px; height: 1px; background: var(--gold); opacity: 0.6; }
 
-  h1 { font-family: 'Fraunces', serif; font-weight: 700; font-size: clamp(30px, 6vw, 46px); text-align: center; letter-spacing: -0.01em; }
-  h1 em { font-style: italic; color: var(--gold); font-weight: 500; }
+  h1 { font-family: 'Fraunces', serif; font-weight: 600; font-size: clamp(30px, 6vw, 44px); text-align: center; }
+  h1 em { font-style: italic; color: var(--gold); }
 
-  .subtitle { margin-top: 14px; color: var(--text-dim); font-size: 15px; text-align: center; max-width: 460px; }
+  .subtitle { margin-top: 12px; color: var(--text-dim); font-size: 15px; text-align: center; max-width: 480px; }
 
-  .fortune-banner {
-    margin-top: 28px; max-width: 560px; width: 100%; text-align: center;
-    font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--gold);
-    background: var(--card); border: 1px solid var(--line); padding: 12px 20px;
-    border-radius: 100px; opacity: 0; transform: translateY(-6px);
-    transition: opacity 0.4s ease, transform 0.4s ease;
+  /* ---------- setup panel ---------- */
+  .setup {
+    margin-top: 36px; width: 100%; max-width: 560px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 20px;
+    padding: 26px;
   }
-  .fortune-banner.show { opacity: 1; transform: translateY(0); }
+  .setup-label { font-size: 13px; font-weight: 600; color: var(--text-dim); margin-bottom: 10px; letter-spacing: 0.03em; }
 
-  .btn-row { margin-top: 36px; display: flex; gap: 12px; align-items: center; }
+  .name-input-row { display: flex; gap: 8px; }
+  #name-input {
+    flex: 1; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 12px;
+    padding: 13px 16px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px;
+    transition: border-color 0.2s ease;
+  }
+  #name-input:focus { outline: none; border-color: var(--gold); }
+  #add-name-btn {
+    padding: 0 20px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg-soft);
+    color: var(--text); font-weight: 600; font-size: 14px; cursor: pointer;
+    transition: border-color 0.2s ease;
+  }
+  #add-name-btn:hover { border-color: var(--gold); }
 
-  #generate-btn {
-    padding: 20px 52px; border: none; border-radius: 100px;
-    background: linear-gradient(135deg, var(--gold), #C9932B);
-    color: #14180F; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 17px;
-    cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 14px 30px -10px rgba(232, 185, 63, 0.45);
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; min-height: 10px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg-soft); border: 1px solid var(--line); border-radius: 100px;
+    padding: 7px 8px 7px 14px; font-size: 13px; font-weight: 500;
   }
-  #generate-btn:hover { transform: translateY(-3px); box-shadow: 0 18px 36px -10px rgba(232, 185, 63, 0.55); }
-  #generate-btn:active { transform: translateY(0) scale(0.97); }
-  #generate-btn:disabled { opacity: 0.65; cursor: default; transform: none; }
-
-  #skip-btn {
-    display: none;
-    padding: 20px 26px; border-radius: 100px; cursor: pointer;
-    background: var(--bg-soft); color: var(--text); border: 1px solid var(--line);
-    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px;
-    transition: border-color 0.2s ease, transform 0.2s ease;
-  }
-  #skip-btn:hover { border-color: var(--gold); transform: translateY(-2px); }
-
-  .hint { margin-top: 16px; font-size: 13px; color: var(--text-dim); min-height: 18px; text-align: center; }
-
-  /* ---------- single game card ---------- */
-  .game-card {
-    margin-top: 40px; width: 100%; max-width: 640px;
-    background: var(--card); border: 1px solid var(--line); border-radius: 22px;
-    padding: 10px 26px 30px;
-    position: relative;
-    opacity: 0; transform: translateY(16px);
-    overflow: hidden;
-  }
-  .game-card.show { animation: cardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
-
-  .game-card.shake { animation: cardShake 0.42s ease; }
-  @keyframes cardShake {
-    10%, 90% { transform: translateX(-1px); }
-    20%, 80% { transform: translateX(3px); }
-    30%, 50%, 70% { transform: translateX(-6px); }
-    40%, 60% { transform: translateX(6px); }
-  }
-
-  .card-top { display: flex; align-items: center; justify-content: space-between; padding-top: 18px; margin-bottom: 4px; }
-  .card-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.1em; color: var(--text-dim); text-transform: uppercase; }
-
-  .row-actions { display: flex; gap: 8px; }
-  .icon-btn {
-    width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg-soft);
-    color: var(--text-dim); cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center;
-    transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-  }
-  .icon-btn:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
-  .icon-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
-
-  /* ---------- giant roaring dinosaur stage ---------- */
-  .dino-stage {
-    position: relative;
-    height: 190px;
-    display: flex; align-items: flex-end; justify-content: center;
-    margin-bottom: 6px;
-  }
-
-  .dino-big {
-    width: 190px; height: auto; display: inline-block;
-    transform-origin: 50% 88%;
-    filter: drop-shadow(0 14px 18px rgba(0,0,0,0.55));
-  }
-  .dino-big.charging { animation: dinoRoarCharge 0.5s ease-in-out forwards; }
-  @keyframes dinoRoarCharge {
-    0%   { transform: scale(1) rotate(0deg); }
-    20%  { transform: scale(0.96) rotate(2deg); }
-    45%  { transform: scale(0.93) rotate(-2deg); }
-    70%  { transform: scale(1.02) rotate(1deg); }
-    100% { transform: scale(1.22) rotate(-3deg); }
-  }
-  .dino-big.roar { animation: dinoRoarBurst 0.5s cubic-bezier(0.34, 1.6, 0.64, 1) forwards; }
-  @keyframes dinoRoarBurst {
-    0%   { transform: scale(1.22) rotate(-3deg); }
-    35%  { transform: scale(1.42) rotate(3deg); }
-    70%  { transform: scale(1.12) rotate(-1deg); }
-    100% { transform: scale(1) rotate(0deg); }
-  }
-
-  .roar-text {
-    position: absolute; top: 6px; left: 50%; transform: translateX(-50%) scale(0.4) rotate(-6deg);
-    font-family: 'Fraunces', serif; font-weight: 900; font-size: 34px; letter-spacing: 0.02em;
-    background: linear-gradient(135deg, #FFE28A, #FF7A3C 60%, #E8574C);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    text-shadow: 0 0 24px rgba(255,150,60,0.4);
-    opacity: 0; pointer-events: none; white-space: nowrap; z-index: 8;
-  }
-  .roar-text.pop { animation: roarPop 0.7s cubic-bezier(0.34, 1.6, 0.64, 1) forwards; }
-  @keyframes roarPop {
-    0%   { opacity: 0; transform: translateX(-50%) scale(0.3) rotate(-8deg); }
-    30%  { opacity: 1; transform: translateX(-50%) scale(1.15) rotate(3deg); }
-    55%  { opacity: 1; transform: translateX(-50%) scale(1) rotate(-2deg); }
-    100% { opacity: 0; transform: translateX(-50%) scale(0.9) rotate(0deg) translateY(-14px); }
-  }
-
-  .ember {
-    position: absolute; width: 14px; height: 14px; border-radius: 50%;
-    background: radial-gradient(circle, #FFF3C4, #FF9A3C 55%, transparent 75%);
-    bottom: 78px; left: 50%; margin-left: -7px;
-    opacity: 0; transform: scale(0.3);
-    filter: blur(1.5px); pointer-events: none;
-    transition: opacity 0.5s ease, transform 0.5s ease;
-    z-index: 3;
-  }
-  .ember.growing { opacity: 1; transform: scale(3.4); }
-
-  .flash {
-    position: absolute; width: 130px; height: 130px; border-radius: 50%;
-    bottom: 20px; left: 50%; margin-left: -65px; pointer-events: none; z-index: 4; opacity: 0;
-    background: radial-gradient(circle, rgba(255,230,160,0.95), rgba(255,120,40,0.42) 55%, transparent 75%);
-  }
-  .flash.burst { animation: flashBurst 0.42s ease-out forwards; }
-  @keyframes flashBurst {
-    0%   { opacity: 0; transform: scale(0.3); }
-    28%  { opacity: 1; transform: scale(1.3); }
-    100% { opacity: 0; transform: scale(1.85); }
-  }
-
-  .flame-ball {
-    width: 48px; height: 48px; border-radius: 50%;
-    position: absolute; bottom: 61px; left: 50%; margin-left: -24px; z-index: 5;
+  .chip button {
+    width: 18px; height: 18px; border-radius: 50%; border: none; cursor: pointer;
+    background: rgba(255,255,255,0.12); color: var(--text-dim); font-size: 11px; line-height: 1;
     display: flex; align-items: center; justify-content: center;
-    font-family: 'Fraunces', serif; font-weight: 700; font-size: 17px;
-    opacity: 0;
-    box-shadow: 0 0 18px 6px rgba(255,130,40,0.55), inset -3px -3px 6px rgba(0,0,0,0.18), inset 3px 3px 6px rgba(255,255,255,0.25);
   }
-  .flame-ball.tumbling {
-    opacity: 1;
-    color: #3A1400;
-    background: radial-gradient(circle at 35% 30%, #FFE28A, #FF9A3C 45%, #E8574C 78%, #B23A2E);
-    animation: flameFlicker 0.09s ease-in-out infinite;
+  .chip button:hover { background: var(--danger); color: #fff; }
+
+  .ratio-row { display: flex; align-items: center; gap: 14px; margin-top: 22px; flex-wrap: wrap; }
+  #winner-count {
+    width: 84px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 14px; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 15px;
+    text-align: center;
   }
-  @keyframes flameFlicker {
-    0%   { transform: scale(1) rotate(-4deg); }
-    50%  { transform: scale(1.1) rotate(4deg); }
-    100% { transform: scale(0.94) rotate(-2deg); }
+  #winner-count:focus { outline: none; border-color: var(--gold); }
+  .ratio-info { font-size: 13px; color: var(--text-dim); }
+  .ratio-info b { color: var(--gold); font-family: 'JetBrains Mono', monospace; }
+
+  #start-btn {
+    margin-top: 24px; width: 100%; padding: 17px; border: none; border-radius: 100px;
+    background: linear-gradient(135deg, var(--gold), #C9932B);
+    color: #14180F; font-weight: 700; font-size: 16px; cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 12px 26px -10px rgba(232, 185, 63, 0.45);
+  }
+  #start-btn:hover { transform: translateY(-2px); }
+  #start-btn:disabled { opacity: 0.55; cursor: default; transform: none; }
+
+  .setup-error { margin-top: 12px; font-size: 13px; color: var(--danger); min-height: 18px; text-align: center; }
+
+  /* ---------- game area ---------- */
+  .status-bar {
+    margin-top: 34px; display: none; align-items: center; gap: 18px; flex-wrap: wrap; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim);
+  }
+  .status-bar.visible { display: flex; }
+  .status-bar b { color: var(--gold); }
+  .status-bar .pill {
+    background: var(--card); border: 1px solid var(--line); border-radius: 100px; padding: 9px 18px;
+  }
+
+  .game-actions { margin-top: 16px; display: none; gap: 10px; }
+  .game-actions.visible { display: flex; }
+  .ghost-btn {
+    padding: 11px 22px; border-radius: 100px; cursor: pointer; font-size: 13px; font-weight: 600;
+    background: var(--bg-soft); color: var(--text); border: 1px solid var(--line);
+    transition: border-color 0.2s ease;
+  }
+  .ghost-btn:hover { border-color: var(--gold); }
+
+  .grid {
+    margin-top: 28px; width: 100%; max-width: 940px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 18px;
+  }
+
+  .dino-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 20px;
+    padding: 16px 12px 18px; text-align: center; position: relative; overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    opacity: 0; transform: translateY(14px);
+  }
+  .dino-card.enter { animation: cardEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  @keyframes cardEnter { to { opacity: 1; transform: translateY(0); } }
+
+  .dino-card.clickable:hover { transform: translateY(-4px); border-color: var(--gold); }
+  .dino-card.busy { cursor: default; }
+  .dino-card.done { cursor: default; }
+  .dino-card.done.win { border-color: rgba(232,185,63,0.65); }
+  .dino-card.done.lose { border-color: rgba(255,255,255,0.06); }
+  .dino-card.done.lose .dino-svg { filter: saturate(0.35) brightness(0.8); transition: filter 0.8s ease; }
+
+  .q-badge {
+    position: absolute; top: 12px; right: 12px; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--bg-soft); border: 1px solid var(--line); color: var(--gold);
+    font-family: 'Fraunces', serif; font-weight: 900; font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.3s ease;
+  }
+  .dino-card.done .q-badge, .dino-card.busy .q-badge { opacity: 0; }
+
+  .dino-wrap { position: relative; height: 132px; display: flex; align-items: flex-end; justify-content: center; }
+  .dino-svg { width: 196px; height: auto; overflow: visible; }
+
+  .dino-svg .dino-root, .dino-svg .fire, .dino-svg .jaw, .dino-svg .idle-bob {
+    transform-box: fill-box;
+  }
+  .dino-root { transform-origin: 50% 92%; }
+  .idle-bob { transform-origin: 50% 100%; }
+  .jaw { transform-origin: 6% 30%; }
+  .fire { transform-origin: 0% 50%; opacity: 0; }
+
+  .idle-bob.bobbing { animation: bob 2.4s ease-in-out infinite; }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+
+  .name-tag {
+    margin-top: 10px; font-weight: 600; font-size: 15px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .hint-tag { margin-top: 3px; font-size: 11.5px; color: var(--text-dim); }
+
+  .stamp {
+    position: absolute; top: 34%; left: 50%; z-index: 10;
+    font-family: 'Fraunces', serif; font-weight: 900; font-size: 34px; white-space: nowrap;
+    pointer-events: none; opacity: 0;
+    transform: translate(-50%, -50%);
+  }
+  .stamp.win-stamp {
+    background: linear-gradient(135deg, #FFE28A, var(--gold) 55%, #C9932B);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 18px rgba(232,185,63,0.45));
+  }
+  .stamp.lose-stamp { color: #B9C4BB; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.5)); }
+
+  .smoke {
+    position: absolute; border-radius: 50%; pointer-events: none; z-index: 8;
+    background: radial-gradient(circle, rgba(200,205,200,0.85), rgba(150,155,150,0.15) 70%);
   }
 
   .spark {
-    position: absolute; border-radius: 50%; pointer-events: none; z-index: 6;
+    position: absolute; border-radius: 50%; pointer-events: none; z-index: 8;
     background: radial-gradient(circle, #FFE28A, #FF7A3C 70%);
-    animation: sparkFly 0.55s ease-out forwards;
-  }
-  @keyframes sparkFly { to { transform: translate(var(--sx), var(--sy)) scale(0.15); opacity: 0; } }
-
-  .trail-spark {
-    position: absolute; border-radius: 50%; pointer-events: none; z-index: 6;
-    background: radial-gradient(circle, #FFD98A, #FF7A3C 70%);
-    opacity: 0.9;
-    animation: trailFade 0.35s ease-out forwards;
-  }
-  @keyframes trailFade { to { opacity: 0; transform: scale(0.3); } }
-
-  .shockwave {
-    position: absolute; inset: 0; margin: auto; width: 48px; height: 48px; border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.65); opacity: 0.9; pointer-events: none;
-    animation: shockExpand 0.5s ease-out forwards;
-  }
-  @keyframes shockExpand { to { transform: scale(1.9); opacity: 0; } }
-
-  .balls-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center; }
-
-  .ball-slot {
-    width: 48px; height: 48px; border-radius: 50%;
-    border: 2px dashed var(--line); background: var(--bg-soft);
-    display: flex; align-items: center; justify-content: center;
-    position: relative;
-  }
-  .ball-slot.filled {
-    border: none;
-    box-shadow: inset -3px -3px 6px rgba(0,0,0,0.18), inset 3px 3px 6px rgba(255,255,255,0.35), 0 6px 12px -4px rgba(0,0,0,0.5);
-    animation: settle 0.42s cubic-bezier(0.34, 1.6, 0.64, 1);
-  }
-  @keyframes settle { 0% { transform: scale(0.5); } 60% { transform: scale(1.16); } 100% { transform: scale(1); } }
-
-  .ball-slot.bonus-slot { border-color: var(--gold); }
-  .ball-slot.bonus-slot.filled {
-    box-shadow: 0 0 0 3px rgba(232,185,63,0.5), inset -3px -3px 6px rgba(0,0,0,0.18), inset 3px 3px 6px rgba(255,255,255,0.35), 0 6px 12px -4px rgba(0,0,0,0.5);
   }
 
-  .ball-num { font-family: 'Fraunces', serif; font-weight: 700; font-size: 17px; }
+  #confetti-layer { position: fixed; inset: 0; pointer-events: none; z-index: 300; overflow: hidden; }
+  .confetti-piece { position: absolute; top: -20px; border-radius: 2px; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(540deg); opacity: 0.2; } }
 
-  .plus-sep { font-size: 20px; color: var(--text-dim); font-weight: 700; margin: 0 2px; }
-
-  .bonus-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .bonus-label {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em;
-    color: var(--gold); opacity: 0; transition: opacity 0.4s ease;
+  .summary {
+    margin-top: 34px; display: none; text-align: center;
+    background: var(--card); border: 1px solid var(--gold); border-radius: 18px;
+    padding: 22px 34px; max-width: 560px;
   }
-  .bonus-label.ready { opacity: 1; }
+  .summary.visible { display: block; animation: cardEnter 0.5s ease forwards; opacity: 0; transform: translateY(14px); }
+  .summary h2 { font-family: 'Fraunces', serif; font-size: 21px; color: var(--gold); margin-bottom: 8px; }
+  .summary p { font-size: 14px; color: var(--text-dim); }
+  .summary b { color: var(--text); }
 
-  /* ---------- luck meter / comment ---------- */
-  .luck-meter {
-    margin-top: 24px; display: flex; align-items: center; gap: 10px;
-    opacity: 0; transition: opacity 0.5s ease;
-  }
-  .luck-meter.ready { opacity: 1; }
-  .luck-bar-track { flex: 1; height: 5px; background: var(--bg-soft); border-radius: 100px; overflow: hidden; }
-  .luck-bar-fill {
-    height: 100%; width: 0%; border-radius: 100px;
-    background: linear-gradient(90deg, var(--c-green), var(--gold));
-    transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .luck-pct { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); width: 34px; text-align: right; }
+  footer { margin-top: 50px; color: var(--text-dim); font-size: 12px; text-align: center; }
 
-  .game-comment {
-    margin-top: 10px; font-size: 12.5px; color: var(--text-dim);
-    opacity: 0; transition: opacity 0.5s ease;
-  }
-  .game-comment.ready { opacity: 1; }
-
-  .placeholder-note { text-align: center; color: var(--text-dim); font-size: 13px; padding: 40px 0; border: 1px dashed var(--line); border-radius: 18px; width: 100%; max-width: 640px; margin-top: 44px; }
-
-  .copied-toast {
-    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
-    background: var(--card); border: 1px solid var(--line); color: var(--text);
-    padding: 10px 18px; border-radius: 100px; font-size: 13px;
-    opacity: 0; transition: opacity 0.25s ease, transform 0.25s ease; z-index: 300;
-  }
-  .copied-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-  .total-count { margin-top: 18px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); }
-  .total-count span { color: var(--gold); font-weight: 600; }
-
-  footer { margin-top: 40px; color: var(--text-dim); font-size: 12px; text-align: center; }
-
-  @media (max-width: 480px) {
-    .dino-stage { height: 130px; }
-    .dino-big { width: 130px; }
-    .roar-text { font-size: 22px; }
-    .ball-slot { width: 40px; height: 40px; }
-    .flame-ball { width: 40px; height: 40px; margin-left: -20px; }
-    .ball-num { font-size: 14px; }
-    .game-card { padding: 6px 18px 22px; }
-    #skip-btn { padding: 16px 18px; font-size: 13px; }
-    #generate-btn { padding: 16px 36px; font-size: 15px; }
+  @media (max-width: 520px) {
+    .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .dino-svg { width: 150px; }
+    .dino-wrap { height: 104px; }
+    .stamp { font-size: 26px; }
   }
 </style>
 </head>
@@ -329,126 +241,185 @@
 
 <div id="confetti-layer"></div>
 
-  <div class="eyebrow">Lucky Draw · FastAPI</div>
-  <h1>행운의 <em>로또번호</em> 생성기</h1>
-  <p class="subtitle">공룡이 크게 포효하며 불을 뿜어 번호를 하나씩 만들어드려요 🦖🔥</p>
+<div class="eyebrow">Dino Draw · FastAPI</div>
+<h1>공룡 뽑기 — <em>당첨</em> or 꽝</h1>
+<p class="subtitle">이름을 넣고 당첨 인원을 정하면, 사람 수만큼 공룡이 나와요. 공룡을 클릭해 결과를 확인하세요 🦖</p>
 
-  <div class="fortune-banner" id="fortune-banner"></div>
-
-  <div class="btn-row">
-    <button id="generate-btn">번호 뽑기 🎱</button>
-    <button id="skip-btn">건너뛰기 ⏭</button>
+<div class="setup" id="setup">
+  <div class="setup-label">참가자 이름 (엔터 또는 추가 버튼, 쉼표로 여러 명 한번에 가능)</div>
+  <div class="name-input-row">
+    <input id="name-input" type="text" placeholder="예: 우경, 민수, 지현" maxlength="60">
+    <button id="add-name-btn">추가</button>
   </div>
-  <div class="hint" id="hint"></div>
+  <div class="chips" id="chips"></div>
 
-  <div id="game-area">
-    <div class="placeholder-note" id="placeholder-note">아직 생성된 번호가 없어요. 버튼을 눌러보세요.</div>
+  <div class="ratio-row">
+    <div class="setup-label" style="margin:0">당첨 인원</div>
+    <input id="winner-count" type="number" min="0" value="1">
+    <div class="ratio-info" id="ratio-info">참가자를 추가해주세요</div>
   </div>
 
-  <div class="total-count" id="total-count"></div>
+  <button id="start-btn" disabled>공룡 소환하기 🦖</button>
+  <div class="setup-error" id="setup-error"></div>
+</div>
 
-  <footer>이 결과는 무작위 생성이며 실제 로또 당첨과는 무관합니다. 재미로만 즐겨주세요 :)</footer>
+<div class="status-bar" id="status-bar">
+  <div class="pill">전체 <b id="stat-total">0</b>명</div>
+  <div class="pill">당첨 <b id="stat-win">0</b> / <b id="stat-win-total">0</b></div>
+  <div class="pill">남은 공룡 <b id="stat-left">0</b></div>
+</div>
+<div class="game-actions" id="game-actions">
+  <button class="ghost-btn" id="reveal-all-btn">전체 공개 ⏭</button>
+  <button class="ghost-btn" id="reset-btn">새 게임 ↺</button>
+</div>
 
-  <div class="copied-toast" id="copied-toast">번호가 복사되었어요 📋</div>
+<div class="grid" id="grid"></div>
+
+<div class="summary" id="summary">
+  <h2>🎉 결과 발표</h2>
+  <p id="summary-text"></p>
+</div>
+
+<footer>이 결과는 무작위이며, 재미로만 즐겨주세요 :)</footer>
 
 <script>
-  const btn = document.getElementById('generate-btn');
-  const skipBtn = document.getElementById('skip-btn');
-  const hint = document.getElementById('hint');
-  const gameArea = document.getElementById('game-area');
-  const placeholderNote = document.getElementById('placeholder-note');
-  const fortuneBanner = document.getElementById('fortune-banner');
+  /* ============ 상태 ============ */
+  const names = [];
+  let gameResults = null;   // [{name, win}]
+  let revealedCount = 0;
+  let foundWinners = 0;
+
+  /* ============ DOM ============ */
+  const nameInput = document.getElementById('name-input');
+  const addNameBtn = document.getElementById('add-name-btn');
+  const chipsEl = document.getElementById('chips');
+  const winnerCountEl = document.getElementById('winner-count');
+  const ratioInfoEl = document.getElementById('ratio-info');
+  const startBtn = document.getElementById('start-btn');
+  const setupErrorEl = document.getElementById('setup-error');
+  const setupEl = document.getElementById('setup');
+  const gridEl = document.getElementById('grid');
+  const statusBar = document.getElementById('status-bar');
+  const gameActions = document.getElementById('game-actions');
+  const revealAllBtn = document.getElementById('reveal-all-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  const summaryEl = document.getElementById('summary');
+  const summaryTextEl = document.getElementById('summary-text');
   const confettiLayer = document.getElementById('confetti-layer');
-  const copiedToast = document.getElementById('copied-toast');
-  const totalCountEl = document.getElementById('total-count');
 
-  const confettiColors = ['#E8B93F', '#4C8DE8', '#E8574C', '#4FAE6E', '#EDEFF7'];
+  const statTotal = document.getElementById('stat-total');
+  const statWin = document.getElementById('stat-win');
+  const statWinTotal = document.getElementById('stat-win-total');
+  const statLeft = document.getElementById('stat-left');
 
-  const COLOR_HEX = {
-    'c-yellow': { bg: '#E8B93F', text: '#12172A' },
-    'c-blue':   { bg: '#4C8DE8', text: '#F5F8FF' },
-    'c-red':    { bg: '#E8574C', text: '#FFF6F5' },
-    'c-gray':   { bg: '#8A93A6', text: '#12172A' },
-    'c-green':  { bg: '#4FAE6E', text: '#F3FFF6' }
-  };
-
-  const fortunes = [
-    '오늘은 왠지 좋은 예감이 드는 날이에요 ✨',
-    '숫자 6이 유난히 눈에 띄는 하루예요 👀',
-    '커피 한 잔의 여유가 행운을 부를지도 몰라요 ☕',
-    '창밖을 한 번 보면 힌트가 있을지도... 🌤️',
-    '오늘의 행운 색깔은 골드예요 🟡',
-    '왼쪽 주머니에 행운이 들어있을 수도 있어요 👖',
-    '이번 주는 유난히 숫자 운이 좋아 보여요 🔮',
-    '가볍게 웃고 시작하면 운이 따라올 거예요 😄'
-  ];
-
-  const roarWords = ['크아앙!!', '크르릉!!', '어흥!!', '크워어어!!'];
-
-  const comments = {
-    consecutive: '연속된 숫자가 포함되어 있어요 🔥',
-    lucky7: '럭키 세븐, 7이 들어있어요 🍀',
-    allLowHalf: '작은 숫자들이 몰려 있어요 📉',
-    allHighHalf: '큰 숫자들이 몰려 있어요 📈',
-    sameColor: '한 가지 색상 구간에 몰려 있어요 🎨',
-    balanced: '숫자 분포가 고르게 퍼져 있어요 ⚖️',
-    default: ['오늘따라 유독 마음에 드는 조합이네요', '이 조합, 어딘가 특별한 느낌이 들어요', '숫자들의 균형이 나쁘지 않아요']
-  };
-
-  let totalGenerated = 0;
+  const confettiColors = ['#E8B93F', '#4C8DE8', '#E8574C', '#4FAE6E', '#F1EFE4'];
 
   function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-  function colorGroup(n) {
-    if (n <= 10) return 'c-yellow';
-    if (n <= 20) return 'c-blue';
-    if (n <= 30) return 'c-red';
-    if (n <= 40) return 'c-gray';
-    return 'c-green';
+  /* ============ 셋업 UI ============ */
+  function renderChips() {
+    chipsEl.innerHTML = '';
+    names.forEach((n, i) => {
+      const chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.innerHTML = `${escapeHtml(n)} <button title="삭제">✕</button>`;
+      chip.querySelector('button').addEventListener('click', () => {
+        names.splice(i, 1);
+        renderChips();
+      });
+      chipsEl.appendChild(chip);
+    });
+    updateRatioInfo();
   }
 
-  async function fetchLotto() {
-    const res = await fetch('/api/lotto');
-    if (!res.ok) throw new Error('서버 요청 실패');
-    return await res.json(); // { main: [...], bonus: n }
+  function escapeHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  function analyzeGame(numbers) {
-    const notes = [];
-    const sorted = [...numbers].sort((a, b) => a - b);
-    let hasConsecutive = false;
-    for (let i = 0; i < sorted.length - 1; i++) {
-      if (sorted[i + 1] - sorted[i] === 1) hasConsecutive = true;
+  function updateRatioInfo() {
+    const total = names.length;
+    let w = parseInt(winnerCountEl.value, 10);
+    if (isNaN(w) || w < 0) w = 0;
+    if (total === 0) {
+      ratioInfoEl.textContent = '참가자를 추가해주세요';
+      startBtn.disabled = true;
+      return;
     }
-    if (hasConsecutive) notes.push(comments.consecutive);
-    if (numbers.some(n => [7, 17, 27, 37].includes(n))) notes.push(comments.lucky7);
-
-    const groups = new Set(numbers.map(colorGroup));
-    if (groups.size <= 2) notes.push(comments.sameColor);
-
-    const lowCount = numbers.filter(n => n <= 22).length;
-    if (lowCount >= 5) notes.push(comments.allLowHalf);
-    if (lowCount <= 1) notes.push(comments.allHighHalf);
-    if (groups.size >= 4) notes.push(comments.balanced);
-
-    if (notes.length === 0) notes.push(comments.default[Math.floor(Math.random() * comments.default.length)]);
-    return notes[0];
+    if (w > total) { w = total; winnerCountEl.value = total; }
+    winnerCountEl.max = total;
+    const pct = total > 0 ? Math.round((w / total) * 100) : 0;
+    ratioInfoEl.innerHTML = `<b>${w}</b> / ${total}명 당첨 (확률 <b>${pct}%</b>)`;
+    startBtn.disabled = false;
   }
 
-  function luckScoreFor(numbers) {
-    const sum = numbers.reduce((a, b) => a + b, 0);
-    return Math.min(99, Math.max(35, 40 + (sum % 55)));
+  function addNamesFromInput() {
+    const raw = nameInput.value.trim();
+    if (!raw) return;
+    const parts = raw.split(/[,\n]+/).map(s => s.trim()).filter(Boolean);
+    for (const p of parts) {
+      if (names.length >= 30) { setupErrorEl.textContent = '최대 30명까지 가능해요.'; break; }
+      names.push(p.slice(0, 12));
+    }
+    nameInput.value = '';
+    setupErrorEl.textContent = '';
+    renderChips();
+    nameInput.focus();
   }
 
-  function copyNumbers(main, bonus) {
-    const text = `번호: ${main.join(', ')} + 보너스 ${bonus}`;
-    navigator.clipboard?.writeText(text).catch(() => {});
-    copiedToast.classList.add('show');
-    setTimeout(() => copiedToast.classList.remove('show'), 1600);
+  addNameBtn.addEventListener('click', addNamesFromInput);
+  nameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addNamesFromInput(); });
+  winnerCountEl.addEventListener('input', updateRatioInfo);
+
+  /* ============ 공룡 SVG 템플릿 ============ */
+  function dinoSvg() {
+    return `
+    <svg class="dino-svg" viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+      <g class="dino-root">
+        <g class="idle-bob bobbing">
+          <path d="M62,120 Q20,128 8,106 Q2,94 20,92 Q46,90 66,102 Z"
+                fill="#5E9147" stroke="#2E4B22" stroke-width="4" stroke-linejoin="round"/>
+          <rect x="66" y="132" width="24" height="34" rx="11" fill="#4E7C3A" stroke="#2E4B22" stroke-width="4"/>
+          <rect x="116" y="136" width="22" height="32" rx="10" fill="#4E7C3A" stroke="#2E4B22" stroke-width="4"/>
+          <ellipse cx="104" cy="112" rx="58" ry="46" fill="#5E9147" stroke="#2E4B22" stroke-width="4"/>
+          <ellipse cx="116" cy="128" rx="34" ry="26" fill="#D7E8B0"/>
+          <path d="M58,74 L68,56 L80,72 Z" fill="#3F6B2F"/>
+          <path d="M84,66 L94,46 L106,64 Z" fill="#3F6B2F"/>
+          <path d="M112,62 L122,44 L134,62 Z" fill="#3F6B2F"/>
+          <path d="M120,86 Q132,46 170,36 Q186,34 194,48 L196,70 Q166,94 130,98 Z"
+                fill="#5E9147" stroke="#2E4B22" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M192,66 L246,66 L240,84 L192,84 Z" fill="#7A2A24"/>
+          <path d="M150,64 Q148,26 186,22 Q232,18 248,48 Q252,58 244,62 L192,66 Q168,70 150,64 Z"
+                fill="#5E9147" stroke="#2E4B22" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M200,64 L206,74 L212,64 Z" fill="#F5F0DC"/>
+          <path d="M216,64 L222,74 L228,64 Z" fill="#F5F0DC"/>
+          <path d="M232,62 L238,72 L244,62 Z" fill="#F5F0DC"/>
+          <g class="jaw">
+            <path d="M190,80 Q192,72 202,74 L240,80 Q248,84 242,92 Q220,102 196,94 Q188,88 190,80 Z"
+                  fill="#4E7C3A" stroke="#2E4B22" stroke-width="4" stroke-linejoin="round"/>
+          </g>
+          <circle cx="238" cy="42" r="3.5" fill="#2E4B22"/>
+          <g class="eye-open">
+            <circle cx="182" cy="42" r="10" fill="#FFFFFF" stroke="#2E4B22" stroke-width="3"/>
+            <circle cx="185" cy="43" r="4.5" fill="#1B2814"/>
+          </g>
+          <g class="eye-dead" opacity="0">
+            <line x1="175" y1="35" x2="190" y2="50" stroke="#2E4B22" stroke-width="4" stroke-linecap="round"/>
+            <line x1="190" y1="35" x2="175" y2="50" stroke="#2E4B22" stroke-width="4" stroke-linecap="round"/>
+          </g>
+          <path d="M138,104 Q152,108 150,118 Q142,122 134,114 Z" fill="#4E7C3A" stroke="#2E4B22" stroke-width="4" stroke-linejoin="round"/>
+          <g class="fire" transform="translate(248,72)">
+            <path d="M0,0 Q26,-24 62,-12 Q88,-2 62,10 Q26,24 0,0 Z" fill="#FF7A3C"/>
+            <path d="M0,0 Q20,-15 46,-8 Q64,-1 46,7 Q20,15 0,0 Z" fill="#FFB25C"/>
+            <path d="M0,0 Q13,-8 28,-4 Q38,0 28,4 Q13,8 0,0 Z" fill="#FFE9A8"/>
+          </g>
+        </g>
+      </g>
+    </svg>`;
   }
 
-  function burstConfetti() {
-    for (let i = 0; i < 60; i++) {
+  /* ============ 이펙트 헬퍼 ============ */
+  function burstConfetti(count = 70) {
+    for (let i = 0; i < count; i++) {
       const piece = document.createElement('div');
       piece.className = 'confetti-piece';
       const size = 6 + Math.random() * 6;
@@ -456,373 +427,359 @@
       piece.style.height = size * 0.4 + 'px';
       piece.style.left = Math.random() * 100 + 'vw';
       piece.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
-      piece.style.animationDuration = (2.4 + Math.random() * 1.6) + 's';
+      piece.style.animationDuration = (2.2 + Math.random() * 1.6) + 's';
       confettiLayer.appendChild(piece);
       setTimeout(() => piece.remove(), 4200);
     }
   }
 
-  function spawnSparks(stage, originEl, count = 12) {
-    const stageRect = stage.getBoundingClientRect();
-    const originRect = originEl.getBoundingClientRect();
-    const originX = originRect.left - stageRect.left + originRect.width / 2;
-    const originY = originRect.bottom - stageRect.top - 20;
-
+  function spawnSparks(card, x, y, count = 10) {
     for (let i = 0; i < count; i++) {
       const spark = document.createElement('div');
       spark.className = 'spark';
-      const size = 5 + Math.random() * 7;
+      const size = 4 + Math.random() * 6;
       spark.style.width = size + 'px';
       spark.style.height = size + 'px';
-      spark.style.left = originX + 'px';
-      spark.style.top = originY + 'px';
-      const angle = (Math.random() * 140 - 20) * (Math.PI / 180);
-      const dist = 40 + Math.random() * 50;
-      spark.style.setProperty('--sx', Math.cos(angle) * dist + 'px');
-      spark.style.setProperty('--sy', Math.sin(angle) * dist + 'px');
-      stage.appendChild(spark);
-      setTimeout(() => spark.remove(), 600);
+      spark.style.left = x + 'px';
+      spark.style.top = y + 'px';
+      card.appendChild(spark);
+      const angle = (Math.random() * 90 - 45) * (Math.PI / 180);
+      const dist = 34 + Math.random() * 40;
+      spark.animate([
+        { transform: 'translate(0,0) scale(1)', opacity: 1 },
+        { transform: `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px) scale(0.15)`, opacity: 0 }
+      ], { duration: 480 + Math.random() * 160, easing: 'ease-out', fill: 'forwards' });
+      setTimeout(() => spark.remove(), 700);
     }
   }
 
-  function spawnTrail(container, startX, startY, endX, endY) {
-    const steps = 5;
-    for (let i = 1; i <= steps; i++) {
+  function spawnSmoke(card, x, y, count = 3) {
+    for (let i = 0; i < count; i++) {
       setTimeout(() => {
-        const t = i / steps;
-        const x = startX + (endX - startX) * t;
-        const y = startY + (endY - startY) * t;
-        const trail = document.createElement('div');
-        trail.className = 'trail-spark';
-        const size = 8 - i * 0.8;
-        trail.style.width = size + 'px';
-        trail.style.height = size + 'px';
-        trail.style.left = x + 'px';
-        trail.style.top = y + 'px';
-        container.appendChild(trail);
-        setTimeout(() => trail.remove(), 380);
-      }, i * 55);
+        const puff = document.createElement('div');
+        puff.className = 'smoke';
+        const size = 12 + Math.random() * 10;
+        puff.style.width = size + 'px';
+        puff.style.height = size + 'px';
+        puff.style.left = (x + Math.random() * 14 - 7) + 'px';
+        puff.style.top = y + 'px';
+        card.appendChild(puff);
+        puff.animate([
+          { transform: 'translateY(0) scale(0.6)', opacity: 0.85 },
+          { transform: `translateY(-${30 + Math.random() * 18}px) scale(1.5)`, opacity: 0 }
+        ], { duration: 850 + Math.random() * 250, easing: 'ease-out', fill: 'forwards' });
+        setTimeout(() => puff.remove(), 1200);
+      }, i * 170);
     }
   }
 
-  function spawnShockwave(slotEl) {
-    const wave = document.createElement('div');
-    wave.className = 'shockwave';
-    slotEl.appendChild(wave);
-    setTimeout(() => wave.remove(), 520);
+  function mouthPoint(card) {
+    // 카드 기준으로 공룡 입 위치(px) 계산
+    const svg = card.querySelector('.dino-svg');
+    const svgRect = svg.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    // viewBox 320x200에서 입 끝 (248,76)
+    const scaleX = svgRect.width / 320;
+    const scaleY = svgRect.height / 200;
+    return {
+      x: svgRect.left - cardRect.left + 248 * scaleX,
+      y: svgRect.top - cardRect.top + 76 * scaleY
+    };
   }
 
-  function buildCard() {
-    const card = document.createElement('div');
-    card.className = 'game-card';
+  /* ============ 애니메이션 시퀀스 (WAAPI - 끊김 없음) ============ */
 
-    card.innerHTML = `
-      <div class="card-top">
-        <div class="card-title">이번 회차 번호</div>
-        <div class="row-actions">
-          <button class="icon-btn copy-btn" title="복사">⧉</button>
-          <button class="icon-btn reroll-btn" title="다시 뽑기">↻</button>
-        </div>
-      </div>
-      <div class="dino-stage">
-        <div class="roar-text">크아앙!!</div>
-        <div class="ember"></div>
-        <div class="flash"></div>
-        <svg class="dino-big" viewBox="0 -10 240 240" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="headGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#6E9247"/>
-              <stop offset="100%" stop-color="#2C4720"/>
-            </linearGradient>
-            <linearGradient id="jawGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#587A34"/>
-              <stop offset="100%" stop-color="#233A19"/>
-            </linearGradient>
-            <radialGradient id="mouthGrad" cx="50%" cy="35%" r="75%">
-              <stop offset="0%" stop-color="#8A1F1F"/>
-              <stop offset="100%" stop-color="#260808"/>
-            </radialGradient>
-          </defs>
-
-          <ellipse cx="120" cy="128" rx="98" ry="46" fill="url(#mouthGrad)"/>
-
-          <path d="M10,112 Q8,18 120,14 Q232,18 230,112 Q120,80 10,112 Z"
-                fill="url(#headGrad)" stroke="#152510" stroke-width="3"/>
-          <path d="M14,124 Q120,178 226,124 Q120,150 14,124 Z"
-                fill="url(#jawGrad)" stroke="#152510" stroke-width="3"/>
-
-          <polygon points="52,98 62,120 44,120" fill="#F3ECDD"/>
-          <polygon points="82,104 92,124 74,124" fill="#F3ECDD"/>
-          <polygon points="112,107 122,127 104,127" fill="#F3ECDD"/>
-          <polygon points="142,107 152,127 134,127" fill="#F3ECDD"/>
-          <polygon points="172,104 182,124 164,124" fill="#F3ECDD"/>
-          <polygon points="198,98 208,120 190,120" fill="#F3ECDD"/>
-
-          <polygon points="58,148 68,128 76,148" fill="#F3ECDD"/>
-          <polygon points="90,152 100,132 108,152" fill="#F3ECDD"/>
-          <polygon points="122,154 132,134 140,154" fill="#F3ECDD"/>
-          <polygon points="154,152 164,132 172,152" fill="#F3ECDD"/>
-          <polygon points="184,148 194,128 202,148" fill="#F3ECDD"/>
-
-          <ellipse cx="66" cy="46" rx="15" ry="11" fill="#E8C55A"/>
-          <ellipse cx="66" cy="46" rx="3.4" ry="8" fill="#170F00"/>
-          <ellipse cx="174" cy="46" rx="15" ry="11" fill="#E8C55A"/>
-          <ellipse cx="174" cy="46" rx="3.4" ry="8" fill="#170F00"/>
-
-          <ellipse cx="100" cy="24" rx="6" ry="4" fill="#170F00"/>
-          <ellipse cx="140" cy="24" rx="6" ry="4" fill="#170F00"/>
-
-          <path d="M40,20 L48,4 L56,22 Z" fill="#3E5B2A"/>
-          <path d="M90,10 L98,-4 L106,12 Z" fill="#3E5B2A"/>
-          <path d="M134,12 L142,-2 L150,10 Z" fill="#3E5B2A"/>
-          <path d="M182,22 L190,6 L198,24 Z" fill="#3E5B2A"/>
-        </svg>
-        <div class="flame-ball"></div>
-      </div>
-      <div class="balls-row">
-        ${Array.from({ length: 6 }).map(() => '<div class="ball-slot"></div>').join('')}
-        <span class="plus-sep">+</span>
-        <div class="bonus-wrap">
-          <div class="ball-slot bonus-slot"></div>
-          <div class="bonus-label">BONUS</div>
-        </div>
-      </div>
-      <div class="luck-meter">
-        <div class="luck-bar-track"><div class="luck-bar-fill"></div></div>
-        <div class="luck-pct"></div>
-      </div>
-      <div class="game-comment"></div>
-    `;
-
-    card._data = null;
-
-    card.querySelector('.copy-btn').addEventListener('click', () => {
-      if (card._data) copyNumbers(card._data.main, card._data.bonus);
-    });
-
-    card.querySelector('.reroll-btn').addEventListener('click', async () => {
-      const rerollBtn = card.querySelector('.reroll-btn');
-      const copyBtn = card.querySelector('.copy-btn');
-      rerollBtn.disabled = true;
-      copyBtn.disabled = true;
-      try {
-        const data = await fetchLotto();
-        await resetAndDraw(card, data);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        rerollBtn.disabled = false;
-        copyBtn.disabled = false;
-      }
-    });
-
-    return card;
+  async function animCharge(root, jaw) {
+    // 몸을 뒤로 젖히며 숨을 크게 들이쉼 + 입이 서서히 벌어짐
+    const a1 = root.animate([
+      { transform: 'rotate(0deg) translateY(0) scale(1)' },
+      { transform: 'rotate(-4deg) translateY(-2px) scale(1.03)', offset: 0.55 },
+      { transform: 'rotate(-8deg) translateY(-5px) scale(1.07)' }
+    ], { duration: 560, easing: 'ease-in-out', fill: 'forwards' });
+    const a2 = jaw.animate([
+      { transform: 'rotate(0deg)' },
+      { transform: 'rotate(14deg)' }
+    ], { duration: 560, easing: 'ease-in-out', fill: 'forwards' });
+    await Promise.all([a1.finished, a2.finished]);
   }
 
-  function resetSlots(card) {
-    const slots = card.querySelectorAll('.ball-slot');
-    slots.forEach(s => {
-      const isBonus = s.classList.contains('bonus-slot');
-      s.className = isBonus ? 'ball-slot bonus-slot' : 'ball-slot';
-      s.style.background = '';
-      s.style.color = '';
-      s.innerHTML = '';
-    });
-    card.querySelector('.luck-meter').classList.remove('ready');
-    card.querySelector('.game-comment').classList.remove('ready');
-    card.querySelector('.bonus-label').classList.remove('ready');
-    card.querySelector('.luck-bar-fill').style.width = '0%';
+  async function animLunge(root) {
+    // 앞으로 확 내밀며 발사 자세
+    await root.animate([
+      { transform: 'rotate(-8deg) translateY(-5px) scale(1.07)' },
+      { transform: 'rotate(4deg) translateY(1px) scale(1.04)' }
+    ], { duration: 170, easing: 'cubic-bezier(0.5, 0, 0.75, 1)', fill: 'forwards' }).finished;
   }
 
-  async function resetAndDraw(card, data) {
-    resetSlots(card);
-    const skipState = { skipped: false };
-    await playDraw(card, data, skipState);
-    finalizeCard(card, data);
+  async function animReturnToIdle(root, jaw) {
+    const a1 = root.animate([
+      { transform: 'rotate(4deg) translateY(1px) scale(1.04)' },
+      { transform: 'rotate(0deg) translateY(0) scale(1)' }
+    ], { duration: 340, easing: 'cubic-bezier(0.34, 1.4, 0.64, 1)', fill: 'forwards' });
+    const a2 = jaw.animate([
+      { transform: 'rotate(14deg)' },
+      { transform: 'rotate(0deg)' }
+    ], { duration: 340, easing: 'ease-out', fill: 'forwards' });
+    await Promise.all([a1.finished, a2.finished]);
   }
 
-  async function playDraw(card, data, skipState) {
-    card._data = data;
-    const stage = card.querySelector('.dino-stage');
-    const dino = card.querySelector('.dino-big');
-    const ember = card.querySelector('.ember');
-    const flash = card.querySelector('.flash');
-    const flame = card.querySelector('.flame-ball');
-    const roarText = card.querySelector('.roar-text');
-    const slots = card.querySelectorAll('.ball-slot');
-    const bonusLabel = card.querySelector('.bonus-label');
+  async function playWin(card) {
+    const root = card.querySelector('.dino-root');
+    const jaw = card.querySelector('.jaw');
+    const fire = card.querySelector('.fire');
+    const bob = card.querySelector('.idle-bob');
+    bob.classList.remove('bobbing');
 
-    const allNumbers = [...data.main, data.bonus];
+    await animCharge(root, jaw);
+    await animLunge(root);
 
-    for (let i = 0; i < allNumbers.length; i++) {
-      if (skipState.skipped) {
-        // 남은 번호 전부 즉시 채우고 종료
-        for (let j = i; j < allNumbers.length; j++) {
-          const nn = allNumbers[j];
-          const gg = colorGroup(nn);
-          slots[j].classList.add('filled');
-          slots[j].style.background = COLOR_HEX[gg].bg;
-          slots[j].style.color = COLOR_HEX[gg].text;
-          slots[j].innerHTML = `<span class="ball-num">${nn}</span>`;
-        }
-        bonusLabel.classList.add('ready');
-        dino.className = 'dino-big';
-        flame.style.opacity = '0';
-        flash.classList.remove('burst');
-        ember.classList.remove('growing');
-        break;
-      }
+    // 불꽃 발사: 커졌다가 일렁이며 유지
+    const mp = mouthPoint(card);
+    spawnSparks(card, mp.x, mp.y, 12);
+    card.animate([
+      { transform: 'translateX(0)' }, { transform: 'translateX(-4px)' },
+      { transform: 'translateX(4px)' }, { transform: 'translateX(-3px)' },
+      { transform: 'translateX(2px)' }, { transform: 'translateX(0)' }
+    ], { duration: 380, easing: 'ease-out' });
 
-      const n = allNumbers[i];
-      const group = colorGroup(n);
-      const isBonus = i === 6;
+    fire.style.opacity = '1';
+    await fire.animate([
+      { transform: 'scale(0.1, 0.4)', opacity: 0.4 },
+      { transform: 'scale(1.2, 1.05)', opacity: 1, offset: 0.55 },
+      { transform: 'scale(1, 1)', opacity: 1 }
+    ], { duration: 260, easing: 'ease-out', fill: 'forwards' }).finished;
 
-      if (isBonus) {
-        bonusLabel.classList.add('ready');
-        hint.textContent = '보너스 번호를 뽑는 중...';
-      }
+    // 일렁임 (원 상태로 돌아오는 keyframe으로 자연 연결)
+    await fire.animate([
+      { transform: 'scale(1,1)' },
+      { transform: 'scale(1.1, 0.9)' },
+      { transform: 'scale(0.94, 1.07)' },
+      { transform: 'scale(1.06, 0.95)' },
+      { transform: 'scale(1,1)' }
+    ], { duration: 640, iterations: 2, easing: 'ease-in-out', fill: 'forwards' }).finished;
 
-      // 1) 공룡이 크게 힘을 모음
-      dino.classList.add('charging');
-      ember.classList.add('growing');
-      await sleep(500);
-      if (skipState.skipped) { i--; continue; }
+    // 스탬프 + 컨페티
+    showStamp(card, '당첨!', true);
+    burstConfetti(60);
 
-      // 2) 포효 + 화면 흔들림 + 불꽃 폭발
-      dino.classList.remove('charging');
-      dino.classList.add('roar');
-      ember.classList.remove('growing');
-      flash.classList.add('burst');
-      card.classList.add('shake');
-      roarText.textContent = roarWords[Math.floor(Math.random() * roarWords.length)];
-      roarText.classList.add('pop');
-      spawnSparks(stage, dino, 14);
-      setTimeout(() => { flash.classList.remove('burst'); }, 430);
-      setTimeout(() => { dino.classList.remove('roar'); }, 520);
-      setTimeout(() => { card.classList.remove('shake'); }, 430);
-      setTimeout(() => { roarText.classList.remove('pop'); }, 720);
+    // 불꽃 자연스럽게 소멸
+    await fire.animate([
+      { transform: 'scale(1,1)', opacity: 1 },
+      { transform: 'scale(0.5, 0.6)', opacity: 0 }
+    ], { duration: 300, easing: 'ease-in', fill: 'forwards' }).finished;
 
-      // 3) 불꽃 공 안에서 숫자가 빠르게 바뀜
-      flame.classList.add('tumbling');
-      flame.style.opacity = '1';
-      flame.style.transform = 'none';
-      flame.style.transition = 'none';
+    await animReturnToIdle(root, jaw);
 
-      const tumbleTimer = setInterval(() => {
-        flame.textContent = Math.ceil(Math.random() * 45);
-      }, 45);
-      await sleep(430 + Math.random() * 140);
-      clearInterval(tumbleTimer);
+    // 기쁨의 폴짝폴짝 2회
+    await root.animate([
+      { transform: 'translateY(0)' },
+      { transform: 'translateY(-12px)', offset: 0.25 },
+      { transform: 'translateY(0)', offset: 0.5 },
+      { transform: 'translateY(-8px)', offset: 0.75 },
+      { transform: 'translateY(0)' }
+    ], { duration: 620, easing: 'ease-in-out', fill: 'forwards' }).finished;
 
-      // 4) 숫자 확정
-      flame.classList.remove('tumbling');
-      flame.textContent = n;
-      flame.style.background = COLOR_HEX[group].bg;
-      flame.style.color = COLOR_HEX[group].text;
-      flame.style.boxShadow = 'inset -3px -3px 6px rgba(0,0,0,0.18), inset 3px 3px 6px rgba(255,255,255,0.35), 0 6px 12px -4px rgba(0,0,0,0.5)';
-
-      await sleep(120);
-
-      // 5) 슬롯까지 날아감 (불꽃 잔상 포함)
-      const flameRect = flame.getBoundingClientRect();
-      const slotRect = slots[i].getBoundingClientRect();
-      const cardRect = card.getBoundingClientRect();
-      const dx = slotRect.left - flameRect.left;
-      const dy = slotRect.top - flameRect.top;
-
-      spawnTrail(
-        card,
-        flameRect.left - cardRect.left + flameRect.width / 2,
-        flameRect.top - cardRect.top + flameRect.height / 2,
-        slotRect.left - cardRect.left + slotRect.width / 2,
-        slotRect.top - cardRect.top + slotRect.height / 2
-      );
-
-      flame.style.transition = 'transform 0.46s cubic-bezier(0.32, 0.9, 0.3, 1.15)';
-      flame.style.transform = `translate(${dx}px, ${dy}px) rotate(${480 + i * 40}deg)`;
-
-      await sleep(470);
-
-      // 6) 착지 + 충격파
-      slots[i].classList.add('filled');
-      slots[i].style.background = COLOR_HEX[group].bg;
-      slots[i].style.color = COLOR_HEX[group].text;
-      slots[i].innerHTML = `<span class="ball-num">${n}</span>`;
-      spawnShockwave(slots[i]);
-
-      // 7) 초기화
-      flame.style.transition = 'none';
-      flame.style.transform = 'none';
-      flame.style.opacity = '0';
-      flame.textContent = '';
-      flame.style.boxShadow = '';
-
-      await sleep(140);
-    }
+    bob.classList.add('bobbing');
   }
 
-  function finalizeCard(card, data) {
-    const score = luckScoreFor(data.main);
-    const comment = analyzeGame(data.main);
+  async function playLose(card) {
+    const root = card.querySelector('.dino-root');
+    const jaw = card.querySelector('.jaw');
+    const fire = card.querySelector('.fire');
+    const bob = card.querySelector('.idle-bob');
+    const eyeOpen = card.querySelector('.eye-open');
+    const eyeDead = card.querySelector('.eye-dead');
+    bob.classList.remove('bobbing');
 
-    const meter = card.querySelector('.luck-meter');
-    const fill = card.querySelector('.luck-bar-fill');
-    const pct = card.querySelector('.luck-pct');
-    const commentEl = card.querySelector('.game-comment');
+    // 당첨과 완전히 똑같은 도입부 → 결과 예측 불가
+    await animCharge(root, jaw);
+    await animLunge(root);
 
-    pct.textContent = score + '%';
-    commentEl.textContent = comment;
+    // 불꽃이 나오려다... 찔끔
+    const mp = mouthPoint(card);
+    fire.style.opacity = '1';
+    await fire.animate([
+      { transform: 'scale(0.1, 0.4)', opacity: 0.4 },
+      { transform: 'scale(0.55, 0.7)', opacity: 1, offset: 0.5 },
+      { transform: 'scale(0.4, 0.5)', opacity: 0.9 }
+    ], { duration: 300, easing: 'ease-out', fill: 'forwards' }).finished;
 
-    meter.classList.add('ready');
-    commentEl.classList.add('ready');
-    requestAnimationFrame(() => { fill.style.width = score + '%'; });
+    // 픽... 픽... 꺼짐 (기침하듯 두 번 움찔)
+    const cough = root.animate([
+      { transform: 'rotate(4deg) translateY(1px) scale(1.04)' },
+      { transform: 'rotate(6deg) translateY(3px) scale(1.02)', offset: 0.3 },
+      { transform: 'rotate(3deg) translateY(1px) scale(1.03)', offset: 0.55 },
+      { transform: 'rotate(6deg) translateY(3px) scale(1.01)' }
+    ], { duration: 480, easing: 'ease-in-out', fill: 'forwards' });
+    await fire.animate([
+      { transform: 'scale(0.4, 0.5)', opacity: 0.9 },
+      { transform: 'scale(0.22, 0.35)', opacity: 0.6, offset: 0.45 },
+      { transform: 'scale(0.3, 0.4)', opacity: 0.5, offset: 0.65 },
+      { transform: 'scale(0.05, 0.1)', opacity: 0 }
+    ], { duration: 480, easing: 'ease-in', fill: 'forwards' }).finished;
+    await cough.finished;
 
-    totalGenerated++;
-    totalCountEl.innerHTML = `지금까지 뽑은 횟수: <span>${totalGenerated}</span>번`;
+    spawnSmoke(card, mp.x, mp.y - 6, 4);
+    await sleep(380); // 한 박자 정적... (긴장)
+
+    // 눈이 X로 스르륵 바뀌며
+    eyeOpen.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, fill: 'forwards' });
+    eyeDead.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220, fill: 'forwards' });
+
+    // 뒤로 쿵 쓰러짐 (끝에서 살짝 튕김)
+    await root.animate([
+      { transform: 'rotate(6deg) translateY(3px) scale(1.01)' },
+      { transform: 'rotate(-30deg) translateY(4px) scale(1.0)', offset: 0.45 },
+      { transform: 'rotate(-76deg) translateY(10px)', offset: 0.8 },
+      { transform: 'rotate(-70deg) translateY(9px)', offset: 0.9 },
+      { transform: 'rotate(-74deg) translateY(10px)' }
+    ], { duration: 900, easing: 'cubic-bezier(0.55, 0, 0.8, 0.6)', fill: 'forwards' }).finished;
+
+    // 쓰러질 때 카드 흔들림 + 먼지
+    card.animate([
+      { transform: 'translateY(0)' }, { transform: 'translateY(3px)' }, { transform: 'translateY(0)' }
+    ], { duration: 240, easing: 'ease-out' });
+    spawnSmoke(card, mp.x - 90, mp.y + 30, 3);
+
+    showStamp(card, '꽝...', false);
   }
 
-  async function generateAll() {
-    btn.disabled = true;
-    hint.textContent = '번호를 뽑는 중...';
-    fortuneBanner.classList.remove('show');
+  function showStamp(card, text, isWin) {
+    const stamp = document.createElement('div');
+    stamp.className = 'stamp ' + (isWin ? 'win-stamp' : 'lose-stamp');
+    stamp.textContent = text;
+    card.appendChild(stamp);
+    stamp.animate([
+      { opacity: 0, transform: 'translate(-50%, -50%) scale(0.3) rotate(-8deg)' },
+      { opacity: 1, transform: 'translate(-50%, -50%) scale(1.18) rotate(3deg)', offset: 0.45 },
+      { opacity: 1, transform: 'translate(-50%, -50%) scale(1) rotate(-2deg)' }
+    ], { duration: 520, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)', fill: 'forwards' });
+  }
+
+  /* ============ 게임 로직 ============ */
+  async function startGame() {
+    setupErrorEl.textContent = '';
+    startBtn.disabled = true;
+    startBtn.textContent = '공룡 소환 중...';
+
+    const winners = parseInt(winnerCountEl.value, 10) || 0;
 
     let data;
     try {
-      data = await fetchLotto();
+      const res = await fetch('/api/draw', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ names, winners })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || '서버 오류');
+      }
+      data = await res.json();
     } catch (e) {
-      hint.textContent = '서버 연결에 실패했어요. 잠시 후 다시 시도해주세요.';
-      btn.disabled = false;
+      setupErrorEl.textContent = e.message || '서버 연결에 실패했어요.';
+      startBtn.disabled = false;
+      startBtn.textContent = '공룡 소환하기 🦖';
       return;
     }
 
-    if (placeholderNote.parentNode) placeholderNote.remove();
+    gameResults = data.results;
+    revealedCount = 0;
+    foundWinners = 0;
 
-    let card = gameArea.querySelector('.game-card');
-    if (!card) {
-      card = buildCard();
-      gameArea.appendChild(card);
-      requestAnimationFrame(() => card.classList.add('show'));
-      await sleep(120);
-    } else {
-      resetSlots(card);
-    }
+    setupEl.style.display = 'none';
+    statusBar.classList.add('visible');
+    gameActions.classList.add('visible');
+    summaryEl.classList.remove('visible');
 
-    const skipState = { skipped: false };
-    skipBtn.style.display = 'inline-block';
-    skipBtn.onclick = () => { skipState.skipped = true; };
+    statTotal.textContent = gameResults.length;
+    statWinTotal.textContent = winners;
+    statWin.textContent = '0';
+    statLeft.textContent = gameResults.length;
 
-    await playDraw(card, data, skipState);
-    finalizeCard(card, data);
-
-    skipBtn.style.display = 'none';
-    fortuneBanner.textContent = fortunes[Math.floor(Math.random() * fortunes.length)];
-    fortuneBanner.classList.add('show');
-    burstConfetti();
-    hint.textContent = '오른쪽 위 ↻ 버튼으로 다시 뽑기도 가능해요.';
-    btn.disabled = false;
+    gridEl.innerHTML = '';
+    gameResults.forEach((r, i) => {
+      const card = buildDinoCard(r, i);
+      gridEl.appendChild(card);
+    });
   }
 
-  btn.addEventListener('click', generateAll);
+  function buildDinoCard(result, index) {
+    const card = document.createElement('div');
+    card.className = 'dino-card clickable enter';
+    card.style.animationDelay = (index * 0.07) + 's';
+    card.innerHTML = `
+      <div class="q-badge">?</div>
+      <div class="dino-wrap">${dinoSvg()}</div>
+      <div class="name-tag">${escapeHtml(result.name)}</div>
+      <div class="hint-tag">클릭해서 확인</div>
+    `;
+
+    card._result = result;
+    card._revealed = false;
+
+    card.addEventListener('click', () => revealCard(card));
+    return card;
+  }
+
+  async function revealCard(card) {
+    if (card._revealed || card.classList.contains('busy')) return;
+    card._revealed = true;
+    card.classList.remove('clickable');
+    card.classList.add('busy');
+    card.querySelector('.hint-tag').textContent = '두구두구...';
+
+    const isWin = card._result.win;
+    if (isWin) {
+      await playWin(card);
+    } else {
+      await playLose(card);
+    }
+
+    card.classList.remove('busy');
+    card.classList.add('done', isWin ? 'win' : 'lose');
+    card.querySelector('.hint-tag').textContent = isWin ? '축하해요! 🎉' : '다음 기회에...';
+
+    revealedCount++;
+    if (isWin) foundWinners++;
+    statWin.textContent = foundWinners;
+    statLeft.textContent = gameResults.length - revealedCount;
+
+    if (revealedCount === gameResults.length) {
+      showSummary();
+    }
+  }
+
+  function showSummary() {
+    const winnersNames = gameResults.filter(r => r.win).map(r => r.name);
+    summaryTextEl.innerHTML = winnersNames.length > 0
+      ? `당첨자: <b>${winnersNames.map(escapeHtml).join(', ')}</b> 🎊`
+      : '이번 판은 당첨자가 없었어요 😅';
+    summaryEl.classList.add('visible');
+    if (winnersNames.length > 0) burstConfetti(90);
+  }
+
+  revealAllBtn.addEventListener('click', async () => {
+    const cards = [...gridEl.querySelectorAll('.dino-card')].filter(c => !c._revealed);
+    for (const card of cards) {
+      revealCard(card); // 순차 대기 없이 살짝 시차만 두고 동시에
+      await sleep(280);
+    }
+  });
+
+  resetBtn.addEventListener('click', () => {
+    gridEl.innerHTML = '';
+    statusBar.classList.remove('visible');
+    gameActions.classList.remove('visible');
+    summaryEl.classList.remove('visible');
+    setupEl.style.display = 'block';
+    startBtn.disabled = names.length === 0;
+    startBtn.textContent = '공룡 소환하기 🦖';
+    gameResults = null;
+  });
+
+  startBtn.addEventListener('click', startGame);
+  renderChips();
 </script>
 
 </body>
