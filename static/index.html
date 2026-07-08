@@ -8,12 +8,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0B1020;
-    --bg-soft: #131A30;
-    --card: #161F38;
-    --text: #EDEFF7;
-    --text-dim: #8B93AC;
-    --line: rgba(255,255,255,0.12);
+    --bg: #0B1B10;
+    --bg-soft: #14261A;
+    --card: #182C1D;
+    --text: #F1EFE4;
+    --text-dim: #9AAE9C;
+    --line: rgba(255,255,255,0.11);
     --gold: #E8B93F;
 
     --c-yellow: #E8B93F;
@@ -27,8 +27,9 @@
 
   body {
     background:
-      radial-gradient(1200px 600px at 50% -10%, #1A2547 0%, transparent 60%),
-      var(--bg);
+      radial-gradient(1300px 650px at 15% -10%, #2B4A26 0%, transparent 55%),
+      radial-gradient(1000px 600px at 95% 10%, #1B3320 0%, transparent 55%),
+      linear-gradient(180deg, #0B1B10, #060F0A 75%);
     color: var(--text);
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
@@ -39,6 +40,12 @@
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
     position: relative;
+  }
+
+  .jungle-decor { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+  .leaf-blob {
+    position: absolute; filter: blur(3px); opacity: 0.35;
+    background: radial-gradient(circle at 35% 30%, #3B6B36, #1E3A1C 70%);
   }
 
   #confetti-layer { position: fixed; inset: 0; pointer-events: none; z-index: 200; overflow: hidden; }
@@ -131,11 +138,11 @@
   }
 
   .dino-big {
-    font-size: 150px; line-height: 1; display: inline-block;
-    transform-origin: 50% 85%;
+    width: 190px; height: auto; display: inline-block;
+    transform-origin: 50% 88%;
     filter: drop-shadow(0 14px 18px rgba(0,0,0,0.55));
   }
-  .dino-big.charging { animation: dinoRoarCharge 0.5s ease-in-out; }
+  .dino-big.charging { animation: dinoRoarCharge 0.5s ease-in-out forwards; }
   @keyframes dinoRoarCharge {
     0%   { transform: scale(1) rotate(0deg); }
     20%  { transform: scale(0.96) rotate(2deg); }
@@ -143,7 +150,7 @@
     70%  { transform: scale(1.02) rotate(1deg); }
     100% { transform: scale(1.22) rotate(-3deg); }
   }
-  .dino-big.roar { animation: dinoRoarBurst 0.5s cubic-bezier(0.34, 1.6, 0.64, 1); }
+  .dino-big.roar { animation: dinoRoarBurst 0.5s cubic-bezier(0.34, 1.6, 0.64, 1) forwards; }
   @keyframes dinoRoarBurst {
     0%   { transform: scale(1.22) rotate(-3deg); }
     35%  { transform: scale(1.42) rotate(3deg); }
@@ -170,7 +177,7 @@
   .ember {
     position: absolute; width: 14px; height: 14px; border-radius: 50%;
     background: radial-gradient(circle, #FFF3C4, #FF9A3C 55%, transparent 75%);
-    bottom: 46px; left: 50%; margin-left: -7px;
+    bottom: 78px; left: 50%; margin-left: -7px;
     opacity: 0; transform: scale(0.3);
     filter: blur(1.5px); pointer-events: none;
     transition: opacity 0.5s ease, transform 0.5s ease;
@@ -180,7 +187,7 @@
 
   .flash {
     position: absolute; width: 130px; height: 130px; border-radius: 50%;
-    bottom: 6px; left: 50%; margin-left: -65px; pointer-events: none; z-index: 4; opacity: 0;
+    bottom: 20px; left: 50%; margin-left: -65px; pointer-events: none; z-index: 4; opacity: 0;
     background: radial-gradient(circle, rgba(255,230,160,0.95), rgba(255,120,40,0.42) 55%, transparent 75%);
   }
   .flash.burst { animation: flashBurst 0.42s ease-out forwards; }
@@ -192,7 +199,7 @@
 
   .flame-ball {
     width: 48px; height: 48px; border-radius: 50%;
-    position: absolute; bottom: 24px; left: 50%; margin-left: -24px; z-index: 5;
+    position: absolute; bottom: 61px; left: 50%; margin-left: -24px; z-index: 5;
     display: flex; align-items: center; justify-content: center;
     font-family: 'Fraunces', serif; font-weight: 700; font-size: 17px;
     opacity: 0;
@@ -300,7 +307,7 @@
 
   @media (max-width: 480px) {
     .dino-stage { height: 130px; }
-    .dino-big { font-size: 96px; }
+    .dino-big { width: 130px; }
     .roar-text { font-size: 22px; }
     .ball-slot { width: 40px; height: 40px; }
     .flame-ball { width: 40px; height: 40px; margin-left: -20px; }
@@ -312,6 +319,13 @@
 </style>
 </head>
 <body>
+
+<div class="jungle-decor">
+  <div class="leaf-blob" style="width:420px;height:300px;top:-120px;left:-100px;border-radius:60% 40% 55% 45% / 45% 55% 40% 60%; transform: rotate(-15deg);"></div>
+  <div class="leaf-blob" style="width:360px;height:260px;top:-80px;right:-120px;border-radius:45% 55% 60% 40% / 55% 45% 60% 40%; transform: rotate(20deg);"></div>
+  <div class="leaf-blob" style="width:320px;height:240px;bottom:-100px;left:-80px;border-radius:55% 45% 40% 60% / 40% 60% 45% 55%; transform: rotate(8deg);"></div>
+  <div class="leaf-blob" style="width:300px;height:220px;bottom:-90px;right:-90px;border-radius:40% 60% 45% 55% / 60% 40% 55% 45%; transform: rotate(-10deg);"></div>
+</div>
 
 <div id="confetti-layer"></div>
 
@@ -514,7 +528,55 @@
         <div class="roar-text">크아앙!!</div>
         <div class="ember"></div>
         <div class="flash"></div>
-        <span class="dino-big">🦖</span>
+        <svg class="dino-big" viewBox="0 -10 240 240" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="headGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#6E9247"/>
+              <stop offset="100%" stop-color="#2C4720"/>
+            </linearGradient>
+            <linearGradient id="jawGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#587A34"/>
+              <stop offset="100%" stop-color="#233A19"/>
+            </linearGradient>
+            <radialGradient id="mouthGrad" cx="50%" cy="35%" r="75%">
+              <stop offset="0%" stop-color="#8A1F1F"/>
+              <stop offset="100%" stop-color="#260808"/>
+            </radialGradient>
+          </defs>
+
+          <ellipse cx="120" cy="128" rx="98" ry="46" fill="url(#mouthGrad)"/>
+
+          <path d="M10,112 Q8,18 120,14 Q232,18 230,112 Q120,80 10,112 Z"
+                fill="url(#headGrad)" stroke="#152510" stroke-width="3"/>
+          <path d="M14,124 Q120,178 226,124 Q120,150 14,124 Z"
+                fill="url(#jawGrad)" stroke="#152510" stroke-width="3"/>
+
+          <polygon points="52,98 62,120 44,120" fill="#F3ECDD"/>
+          <polygon points="82,104 92,124 74,124" fill="#F3ECDD"/>
+          <polygon points="112,107 122,127 104,127" fill="#F3ECDD"/>
+          <polygon points="142,107 152,127 134,127" fill="#F3ECDD"/>
+          <polygon points="172,104 182,124 164,124" fill="#F3ECDD"/>
+          <polygon points="198,98 208,120 190,120" fill="#F3ECDD"/>
+
+          <polygon points="58,148 68,128 76,148" fill="#F3ECDD"/>
+          <polygon points="90,152 100,132 108,152" fill="#F3ECDD"/>
+          <polygon points="122,154 132,134 140,154" fill="#F3ECDD"/>
+          <polygon points="154,152 164,132 172,152" fill="#F3ECDD"/>
+          <polygon points="184,148 194,128 202,148" fill="#F3ECDD"/>
+
+          <ellipse cx="66" cy="46" rx="15" ry="11" fill="#E8C55A"/>
+          <ellipse cx="66" cy="46" rx="3.4" ry="8" fill="#170F00"/>
+          <ellipse cx="174" cy="46" rx="15" ry="11" fill="#E8C55A"/>
+          <ellipse cx="174" cy="46" rx="3.4" ry="8" fill="#170F00"/>
+
+          <ellipse cx="100" cy="24" rx="6" ry="4" fill="#170F00"/>
+          <ellipse cx="140" cy="24" rx="6" ry="4" fill="#170F00"/>
+
+          <path d="M40,20 L48,4 L56,22 Z" fill="#3E5B2A"/>
+          <path d="M90,10 L98,-4 L106,12 Z" fill="#3E5B2A"/>
+          <path d="M134,12 L142,-2 L150,10 Z" fill="#3E5B2A"/>
+          <path d="M182,22 L190,6 L198,24 Z" fill="#3E5B2A"/>
+        </svg>
         <div class="flame-ball"></div>
       </div>
       <div class="balls-row">
@@ -623,7 +685,7 @@
       // 1) 공룡이 크게 힘을 모음
       dino.classList.add('charging');
       ember.classList.add('growing');
-      await sleep(430);
+      await sleep(500);
       if (skipState.skipped) { i--; continue; }
 
       // 2) 포효 + 화면 흔들림 + 불꽃 폭발
