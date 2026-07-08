@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>행운의 로또번호 생성기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0B1020;
+    --bg-soft: #131A30;
+    --card: #161F38;
+    --text: #EDEFF7;
+    --text-dim: #8B93AC;
+    --line: rgba(255,255,255,0.12);
+    --gold: #E8B93F;
+
+    --c-yellow: #E8B93F;
+    --c-blue: #4C8DE8;
+    --c-red: #E8574C;
+    --c-gray: #8A93A6;
+    --c-green: #4FAE6E;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #1A2547 0%, transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 70px 20px 40px;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  #confetti-layer { position: fixed; inset: 0; pointer-events: none; z-index: 200; overflow: hidden; }
+  .confetti-piece { position: absolute; top: -20px; border-radius: 2px; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(540deg); opacity: 0.2; } }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .eyebrow::before, .eyebrow::after { content: ''; width: 22px; height: 1px; background: var(--gold); opacity: 0.6; }
+
+  h1 { font-family: 'Fraunces', serif; font-weight: 700; font-size: clamp(30px, 6vw, 46px); text-align: center; letter-spacing: -0.01em; }
+  h1 em { font-style: italic; color: var(--gold); font-weight: 500; }
+
+  .subtitle { margin-top: 14px; color: var(--text-dim); font-size: 15px; text-align: center; max-width: 460px; }
+
+  .fortune-banner {
+    margin-top: 28px; max-width: 560px; width: 100%; text-align: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--gold);
+    background: var(--card); border: 1px solid var(--line); padding: 12px 20px;
+    border-radius: 100px; opacity: 0; transform: translateY(-6px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .fortune-banner.show { opacity: 1; transform: translateY(0); }
+
+  #generate-btn {
+    margin-top: 36px; padding: 20px 52px; border: none; border-radius: 100px;
+    background: linear-gradient(135deg, var(--gold), #C9932B);
+    color: #14180F; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 17px;
+    cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 14px 30px -10px rgba(232, 185, 63, 0.45);
+  }
+  #generate-btn:hover { transform: translateY(-3px); box-shadow: 0 18px 36px -10px rgba(232, 185, 63, 0.55); }
+  #generate-btn:active { transform: translateY(0) scale(0.97); }
+  #generate-btn:disabled { opacity: 0.65; cursor: default; transform: none; }
+
+  .hint { margin-top: 16px; font-size: 13px; color: var(--text-dim); min-height: 18px; text-align: center; }
+
+  .games { margin-top: 44px; width: 100%; max-width: 660px; display: flex; flex-direction: column; gap: 14px; }
+
+  .game-row {
+    background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px;
+    opacity: 0; transform: translateY(16px); animation: rowIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    position: relative;
+  }
+  @keyframes rowIn { to { opacity: 1; transform: translateY(0); } }
+
+  .game-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .game-label { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: var(--text-dim); display: flex; align-items: center; gap: 8px; }
+  .game-label .letter {
+    width: 22px; height: 22px; border-radius: 6px; background: var(--bg-soft); color: var(--gold);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-family: 'Inter', sans-serif; font-size: 12px;
+  }
+
+  .row-actions { display: flex; gap: 8px; }
+  .icon-btn {
+    width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg-soft);
+    color: var(--text-dim); cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+  .icon-btn:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+  .icon-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+  /* ---------- draw track: dinosaur fire-breather + slots ---------- */
+  .draw-track { display: flex; align-items: center; gap: 18px; position: relative; }
+
+  .dino-emitter {
+    width: 56px; height: 56px; position: relative; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .dino {
+    font-size: 38px; line-height: 1; display: inline-block;
+    transform-origin: 60% 70%;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35));
+  }
+  .dino.breathing { animation: dinoBreathe 0.32s ease-in-out; }
+  @keyframes dinoBreathe {
+    0%   { transform: scale(1) rotate(0deg); }
+    35%  { transform: scale(1.18) rotate(-8deg); }
+    70%  { transform: scale(1.05) rotate(4deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+
+  .flame-ball {
+    width: 46px; height: 46px; border-radius: 50%;
+    position: absolute; top: 5px; left: 32px; z-index: 5;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-weight: 700; font-size: 16px;
+    opacity: 0;
+    box-shadow: 0 0 16px 5px rgba(255,130,40,0.55), inset -3px -3px 6px rgba(0,0,0,0.18), inset 3px 3px 6px rgba(255,255,255,0.25);
+  }
+  .flame-ball.tumbling {
+    opacity: 1;
+    color: #3A1400;
+    background: radial-gradient(circle at 35% 30%, #FFE28A, #FF9A3C 45%, #E8574C 78%, #B23A2E);
+    animation: flameFlicker 0.09s ease-in-out infinite;
+  }
+  @keyframes flameFlicker {
+    0%   { transform: scale(1) rotate(-4deg); }
+    50%  { transform: scale(1.1) rotate(4deg); }
+    100% { transform: scale(0.94) rotate(-2deg); }
+  }
+
+  .spark {
+    position: absolute; border-radius: 50%; pointer-events: none; z-index: 6;
+    background: radial-gradient(circle, #FFE28A, #FF7A3C 70%);
+    animation: sparkFly 0.5s ease-out forwards;
+  }
+  @keyframes sparkFly {
+    to { transform: translate(var(--sx), var(--sy)) scale(0.15); opacity: 0; }
+  }
+
+  .balls-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+  .ball-slot {
+    width: 46px; height: 46px; border-radius: 50%;
+    border: 2px dashed var(--line); background: var(--bg-soft);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .ball-slot.filled {
+    border: none;
+    box-shadow: inset -3px -3px 6px rgba(0,0,0,0.18), inset 3px 3px 6px rgba(255,255,255,0.35), 0 6px 12px -4px rgba(0,0,0,0.5);
+    animation: settle 0.4s cubic-bezier(0.34, 1.6, 0.64, 1);
+  }
+  @keyframes settle { 0% { transform: scale(0.55); } 60% { transform: scale(1.14); } 100% { transform: scale(1); } }
+
+  .ball-num { font-family: 'Fraunces', serif; font-weight: 700; font-size: 17px; }
+
+  /* ---------- luck meter / comment (revealed after draw) ---------- */
+  .luck-meter {
+    margin-top: 18px; display: flex; align-items: center; gap: 10px;
+    opacity: 0; transition: opacity 0.5s ease;
+  }
+  .luck-meter.ready { opacity: 1; }
+  .luck-bar-track { flex: 1; height: 5px; background: var(--bg-soft); border-radius: 100px; overflow: hidden; }
+  .luck-bar-fill {
+    height: 100%; width: 0%; border-radius: 100px;
+    background: linear-gradient(90deg, var(--c-green), var(--gold));
+    transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .luck-pct { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); width: 34px; text-align: right; }
+
+  .game-comment {
+    margin-top: 10px; font-size: 12.5px; color: var(--text-dim);
+    opacity: 0; transition: opacity 0.5s ease;
+  }
+  .game-comment.ready { opacity: 1; }
+
+  .placeholder-note { text-align: center; color: var(--text-dim); font-size: 13px; padding: 40px 0; border: 1px dashed var(--line); border-radius: 18px; }
+
+  .copied-toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--card); border: 1px solid var(--line); color: var(--text);
+    padding: 10px 18px; border-radius: 100px; font-size: 13px;
+    opacity: 0; transition: opacity 0.25s ease, transform 0.25s ease; z-index: 300;
+  }
+  .copied-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .total-count {
+    margin-top: 18px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim);
+  }
+  .total-count span { color: var(--gold); font-weight: 600; }
+
+  footer { margin-top: 40px; color: var(--text-dim); font-size: 12px; text-align: center; }
+
+  @media (max-width: 480px) {
+    .ball-slot, .dino-emitter, .flame-ball { width: 38px; height: 38px; }
+    .dino { font-size: 30px; }
+    .ball-num { font-size: 14px; }
+    .game-row { padding: 16px; }
+    .draw-track { gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="confetti-layer"></div>
+
+  <div class="eyebrow">Lucky Draw · 5 Games · FastAPI</div>
+  <h1>행운의 <em>로또번호</em> 생성기</h1>
+  <p class="subtitle">공룡이 불을 뿜어 번호를 만들어드려요 🦖🔥 서버에서 뽑은 번호로 5게임을 한 번에 확인해보세요</p>
+
+  <div class="fortune-banner" id="fortune-banner"></div>
+
+  <button id="generate-btn">5게임 한번에 뽑기 🎱</button>
+  <div class="hint" id="hint"></div>
+
+  <div class="games" id="games">
+    <div class="placeholder-note">아직 생성된 번호가 없어요. 버튼을 눌러보세요.</div>
+  </div>
+
+  <div class="total-count" id="total-count"></div>
+
+  <footer>이 결과는 무작위 생성이며 실제 로또 당첨과는 무관합니다. 재미로만 즐겨주세요 :)</footer>
+
+  <div class="copied-toast" id="copied-toast">번호가 복사되었어요 📋</div>
+
+<script>
+  const btn = document.getElementById('generate-btn');
+  const hint = document.getElementById('hint');
+  const gamesContainer = document.getElementById('games');
+  const fortuneBanner = document.getElementById('fortune-banner');
+  const confettiLayer = document.getElementById('confetti-layer');
+  const copiedToast = document.getElementById('copied-toast');
+  const totalCountEl = document.getElementById('total-count');
+
+  const letters = ['A', 'B', 'C', 'D', 'E'];
+  const confettiColors = ['#E8B93F', '#4C8DE8', '#E8574C', '#4FAE6E', '#EDEFF7'];
+
+  const COLOR_HEX = {
+    'c-yellow': { bg: '#E8B93F', text: '#12172A' },
+    'c-blue':   { bg: '#4C8DE8', text: '#F5F8FF' },
+    'c-red':    { bg: '#E8574C', text: '#FFF6F5' },
+    'c-gray':   { bg: '#8A93A6', text: '#12172A' },
+    'c-green':  { bg: '#4FAE6E', text: '#F3FFF6' }
+  };
+
+  const fortunes = [
+    '오늘은 왠지 좋은 예감이 드는 날이에요 ✨',
+    '숫자 6이 유난히 눈에 띄는 하루예요 👀',
+    '커피 한 잔의 여유가 행운을 부를지도 몰라요 ☕',
+    '창밖을 한 번 보면 힌트가 있을지도... 🌤️',
+    '오늘의 행운 색깔은 골드예요 🟡',
+    '왼쪽 주머니에 행운이 들어있을 수도 있어요 👖',
+    '이번 주는 유난히 숫자 운이 좋아 보여요 🔮',
+    '가볍게 웃고 시작하면 운이 따라올 거예요 😄'
+  ];
+
+  const comments = {
+    consecutive: '연속된 숫자가 포함되어 있어요 🔥',
+    lucky7: '럭키 세븐, 7이 들어있어요 🍀',
+    allLowHalf: '작은 숫자들이 몰려 있어요 📉',
+    allHighHalf: '큰 숫자들이 몰려 있어요 📈',
+    sameColor: '한 가지 색상 구간에 몰려 있어요 🎨',
+    balanced: '숫자 분포가 고르게 퍼져 있어요 ⚖️',
+    default: ['오늘따라 유독 마음에 드는 조합이네요', '이 조합, 어딘가 특별한 느낌이 들어요', '숫자들의 균형이 나쁘지 않아요']
+  };
+
+  let totalGenerated = 0;
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function colorGroup(n) {
+    if (n <= 10) return 'c-yellow';
+    if (n <= 20) return 'c-blue';
+    if (n <= 30) return 'c-red';
+    if (n <= 40) return 'c-gray';
+    return 'c-green';
+  }
+
+  async function fetchGames(count) {
+    const res = await fetch(`/api/lotto?games=${count}`);
+    if (!res.ok) throw new Error('서버 요청 실패');
+    const data = await res.json();
+    return data.games;
+  }
+
+  function analyzeGame(numbers) {
+    const notes = [];
+    const sorted = [...numbers].sort((a, b) => a - b);
+    let hasConsecutive = false;
+    for (let i = 0; i < sorted.length - 1; i++) {
+      if (sorted[i + 1] - sorted[i] === 1) hasConsecutive = true;
+    }
+    if (hasConsecutive) notes.push(comments.consecutive);
+    if (numbers.some(n => [7, 17, 27, 37].includes(n))) notes.push(comments.lucky7);
+
+    const groups = new Set(numbers.map(colorGroup));
+    if (groups.size <= 2) notes.push(comments.sameColor);
+
+    const lowCount = numbers.filter(n => n <= 22).length;
+    if (lowCount >= 5) notes.push(comments.allLowHalf);
+    if (lowCount <= 1) notes.push(comments.allHighHalf);
+    if (groups.size >= 4) notes.push(comments.balanced);
+
+    if (notes.length === 0) notes.push(comments.default[Math.floor(Math.random() * comments.default.length)]);
+    return notes[0];
+  }
+
+  function luckScoreFor(numbers) {
+    const sum = numbers.reduce((a, b) => a + b, 0);
+    return Math.min(99, Math.max(35, 40 + (sum % 55)));
+  }
+
+  function copyNumbers(numbers, letter) {
+    const text = `게임 ${letter}: ${numbers.join(', ')}`;
+    navigator.clipboard?.writeText(text).catch(() => {});
+    copiedToast.classList.add('show');
+    setTimeout(() => copiedToast.classList.remove('show'), 1600);
+  }
+
+  function burstConfetti() {
+    for (let i = 0; i < 60; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      const size = 6 + Math.random() * 6;
+      piece.style.width = size + 'px';
+      piece.style.height = size * 0.4 + 'px';
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+      piece.style.animationDuration = (2.4 + Math.random() * 1.6) + 's';
+      confettiLayer.appendChild(piece);
+      setTimeout(() => piece.remove(), 4200);
+    }
+  }
+
+  function buildRow(letter, delayIndex) {
+    const row = document.createElement('div');
+    row.className = 'game-row';
+    row.style.animationDelay = (delayIndex * 0.1) + 's';
+
+    row.innerHTML = `
+      <div class="game-top">
+        <div class="game-label"><span class="letter">${letter}</span>GAME ${letter}</div>
+        <div class="row-actions">
+          <button class="icon-btn copy-btn" title="복사">⧉</button>
+          <button class="icon-btn reroll-btn" title="다시 뽑기">↻</button>
+        </div>
+      </div>
+      <div class="draw-track">
+        <div class="dino-emitter"><span class="dino">🦖</span><div class="flame-ball"></div></div>
+        <div class="balls-row">
+          ${Array.from({ length: 6 }).map(() => '<div class="ball-slot"></div>').join('')}
+        </div>
+      </div>
+      <div class="luck-meter">
+        <div class="luck-bar-track"><div class="luck-bar-fill"></div></div>
+        <div class="luck-pct"></div>
+      </div>
+      <div class="game-comment"></div>
+    `;
+
+    row._numbers = null;
+
+    row.querySelector('.copy-btn').addEventListener('click', () => {
+      if (row._numbers) copyNumbers(row._numbers, letter);
+    });
+
+    row.querySelector('.reroll-btn').addEventListener('click', async () => {
+      const rerollBtn = row.querySelector('.reroll-btn');
+      rerollBtn.disabled = true;
+      try {
+        const [newNumbers] = await fetchGames(1);
+        await resetAndDraw(row, newNumbers);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        rerollBtn.disabled = false;
+      }
+    });
+
+    return row;
+  }
+
+  async function resetAndDraw(row, numbers) {
+    // 슬롯 초기화
+    const slots = row.querySelectorAll('.ball-slot');
+    slots.forEach(s => {
+      s.className = 'ball-slot';
+      s.style.background = '';
+      s.style.color = '';
+      s.innerHTML = '';
+    });
+    const meter = row.querySelector('.luck-meter');
+    const comment = row.querySelector('.game-comment');
+    meter.classList.remove('ready');
+    comment.classList.remove('ready');
+    row.querySelector('.luck-bar-fill').style.width = '0%';
+
+    await playDraw(row, numbers);
+    finalizeRow(row, numbers);
+  }
+
+  function spawnSparks(row, originEl) {
+    const rowRect = row.getBoundingClientRect();
+    const originRect = originEl.getBoundingClientRect();
+    const originX = originRect.left - rowRect.left + originRect.width / 2;
+    const originY = originRect.top - rowRect.top + originRect.height / 2;
+
+    for (let i = 0; i < 8; i++) {
+      const spark = document.createElement('div');
+      spark.className = 'spark';
+      const size = 4 + Math.random() * 5;
+      spark.style.width = size + 'px';
+      spark.style.height = size + 'px';
+      spark.style.left = originX + 'px';
+      spark.style.top = originY + 'px';
+      const angle = (Math.random() * 100 - 20) * (Math.PI / 180);
+      const dist = 30 + Math.random() * 30;
+      spark.style.setProperty('--sx', Math.cos(angle) * dist + 'px');
+      spark.style.setProperty('--sy', Math.sin(angle) * dist + 'px');
+      row.appendChild(spark);
+      setTimeout(() => spark.remove(), 550);
+    }
+  }
+
+  async function playDraw(row, numbers) {
+    row._numbers = numbers;
+    const dino = row.querySelector('.dino');
+    const flame = row.querySelector('.flame-ball');
+    const slots = row.querySelectorAll('.ball-slot');
+
+    for (let i = 0; i < numbers.length; i++) {
+      const n = numbers[i];
+      const group = colorGroup(n);
+
+      // 1) 공룡이 움찔하며 숨을 들이쉬고 불꽃을 뿜음
+      dino.classList.add('breathing');
+      spawnSparks(row, dino);
+      setTimeout(() => dino.classList.remove('breathing'), 320);
+
+      flame.classList.add('tumbling');
+      flame.style.opacity = '1';
+      flame.style.transform = 'none';
+      flame.style.transition = 'none';
+
+      const tumbleTimer = setInterval(() => {
+        flame.textContent = Math.ceil(Math.random() * 45);
+      }, 45);
+      await sleep(480 + Math.random() * 160);
+      clearInterval(tumbleTimer);
+
+      // 2) 불꽃이 식으며 숫자가 확정되고 해당 색 공으로 굳어짐
+      flame.classList.remove('tumbling');
+      flame.textContent = n;
+      flame.style.background = COLOR_HEX[group].bg;
+      flame.style.color = COLOR_HEX[group].text;
+      flame.style.boxShadow = 'inset -3px -3px 6px rgba(0,0,0,0.18), inset 3px 3px 6px rgba(255,255,255,0.35), 0 6px 12px -4px rgba(0,0,0,0.5)';
+
+      await sleep(140);
+
+      // 3) 굳어진 공이 날아가서 제자리(슬롯)에 안착
+      const flameRect = flame.getBoundingClientRect();
+      const slotRect = slots[i].getBoundingClientRect();
+      const dx = slotRect.left - flameRect.left;
+      const dy = slotRect.top - flameRect.top;
+
+      flame.style.transition = 'transform 0.5s cubic-bezier(0.32, 0.9, 0.3, 1.15)';
+      flame.style.transform = `translate(${dx}px, ${dy}px) rotate(${480 + i * 40}deg)`;
+
+      await sleep(520);
+
+      // 4) 슬롯에 공 안착
+      slots[i].classList.add('filled');
+      slots[i].style.background = COLOR_HEX[group].bg;
+      slots[i].style.color = COLOR_HEX[group].text;
+      slots[i].innerHTML = `<span class="ball-num">${n}</span>`;
+
+
+      // 5) 불꽃 초기화 (다음 공 준비)
+      flame.style.transition = 'none';
+      flame.style.transform = 'none';
+      flame.style.opacity = '0';
+      flame.textContent = '';
+      flame.style.boxShadow = '';
+
+      await sleep(140);
+    }
+  }
+
+  function finalizeRow(row, numbers) {
+    const score = luckScoreFor(numbers);
+    const comment = analyzeGame(numbers);
+
+    const meter = row.querySelector('.luck-meter');
+    const fill = row.querySelector('.luck-bar-fill');
+    const pct = row.querySelector('.luck-pct');
+    const commentEl = row.querySelector('.game-comment');
+
+    pct.textContent = score + '%';
+    commentEl.textContent = comment;
+
+    meter.classList.add('ready');
+    commentEl.classList.add('ready');
+    requestAnimationFrame(() => { fill.style.width = score + '%'; });
+
+    totalGenerated++;
+    totalCountEl.innerHTML = `지금까지 뽑은 게임 수: <span>${totalGenerated}</span>게임`;
+  }
+
+  async function generateAll() {
+    btn.disabled = true;
+    hint.textContent = '서버에서 번호를 뽑는 중...';
+    fortuneBanner.classList.remove('show');
+    gamesContainer.innerHTML = '';
+
+    let allGames;
+    try {
+      allGames = await fetchGames(5);
+    } catch (e) {
+      hint.textContent = '서버 연결에 실패했어요. 잠시 후 다시 시도해주세요.';
+      btn.disabled = false;
+      return;
+    }
+
+    const rows = allGames.map((numbers, i) => {
+      const row = buildRow(letters[i], i);
+      gamesContainer.appendChild(row);
+      return { row, numbers };
+    });
+
+    const drawPromises = rows.map(({ row, numbers }, i) =>
+      sleep(i * 260).then(() => playDraw(row, numbers)).then(() => finalizeRow(row, numbers))
+    );
+
+    await Promise.all(drawPromises);
+
+    fortuneBanner.textContent = fortunes[Math.floor(Math.random() * fortunes.length)];
+    fortuneBanner.classList.add('show');
+    burstConfetti();
+    hint.textContent = '각 게임 옆 ↻ 버튼으로 개별 다시 뽑기도 가능해요.';
+    btn.disabled = false;
+  }
+
+  btn.addEventListener('click', generateAll);
+</script>
+
+</body>
+</html>
